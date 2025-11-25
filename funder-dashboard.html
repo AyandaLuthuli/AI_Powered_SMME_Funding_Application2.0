@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - Funder Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #2d2dff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-weight: 600;
+      }
+
+      .user-role {
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .access-denied {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .access-denied h2 {
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .access-denied p {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .page-header h1 {
+        color: #2d2dff;
+        font-size: 2.5rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .btn-warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .btn-warning:hover {
+        background: #d97706;
+      }
+
+      .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      /* Overview Cards */
+      .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .overview-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .overview-card h3 {
+        font-size: 1.8rem;
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+      }
+
+      .overview-card p {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .trend {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .trend.up {
+        color: #10b981;
+      }
+
+      .trend.down {
+        color: #ef4444;
+      }
+
+      /* Quick Actions */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .action-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .action-card i {
+        font-size: 2.5rem;
+        color: #2d2dff;
+        margin-bottom: 1rem;
+      }
+
+      .action-card h3 {
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      .action-card p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* Recent Activity */
+      .recent-activity {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .recent-activity h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+
+      .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e7ff;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .activity-content {
+        flex: 1;
+      }
+
+      .activity-content p {
+        margin-bottom: 0.25rem;
+      }
+
+      .activity-time {
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      /* Loading */
+      .loading {
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2d2dff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .overview-cards,
+        .quick-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder Funder
+      </div>
+      <div class="nav-links">
+        <a href="funder-dashboard.html" class="active">Dashboard</a>
+        <a href="funder-funding.html">My Funding</a>
+        <a href="funder-applications.html">Applications</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">F</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Funder</div>
+            <div class="user-role">Funding Provider</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div id="accessDenied" class="access-denied" style="display: none">
+        <h2>Access Denied</h2>
+        <p>You need to be a registered funder to access this portal.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center">
+          <a href="index.html" class="btn btn-primary">Go to Main Site</a>
+          <a href="login.html" class="btn btn-secondary">Login as Funder</a>
+        </div>
+      </div>
+
+      <div id="funderContent" style="display: none">
+        <div class="page-header">
+          <h1>Funder Dashboard</h1>
+          <div class="welcome-message" id="welcomeMessage">Welcome back!</div>
+        </div>
+
+        <!-- Overview Cards -->
+        <div class="overview-cards">
+          <div class="overview-card">
+            <h3 id="totalFunding">0</h3>
+            <p>Active Funding Opportunities</p>
+            <div class="trend up">+2 this month</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="totalApplications">0</h3>
+            <p>Total Applications</p>
+            <div class="trend up">+15 this week</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="pendingReviews">0</h3>
+            <p>Pending Reviews</p>
+            <div class="trend up">+5 today</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="successRate">0%</h3>
+            <p>Funding Success Rate</p>
+            <div class="trend up">+3% this month</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <div
+            class="action-card"
+            onclick="window.location.href='funder-funding.html?action=create'"
+          >
+            <i class="fas fa-plus-circle"></i>
+            <h3>Create Funding</h3>
+            <p>Post a new funding opportunity for SMMEs</p>
+          </div>
+          <div
+            class="action-card"
+            onclick="window.location.href='funder-applications.html'"
+          >
+            <i class="fas fa-tasks"></i>
+            <h3>Review Applications</h3>
+            <p>Manage and review SMME applications</p>
+          </div>
+          <div
+            class="action-card"
+            onclick="window.location.href='funder-funding.html'"
+          >
+            <i class="fas fa-chart-line"></i>
+            <h3>View Performance</h3>
+            <p>Analyze your funding program performance</p>
+          </div>
+          <div
+            class="action-card"
+            onclick="window.location.href='funder-applications.html?filter=matched'"
+          >
+            <i class="fas fa-handshake"></i>
+            <h3>AI Matches</h3>
+            <p>View SMMEs matched by our AI system</p>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+          <h2>Recent Activity</h2>
+          <div id="activityList">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading activity...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+      let currentFunder = null;
+      let funderFunding = [];
+      let funderApplications = [];
+
+      // Check funder authentication
+      document.addEventListener("DOMContentLoaded", async () => {
+        await checkFunderAuth();
+      });
+
+      async function checkFunderAuth() {
+        const userData = localStorage.getItem("fundfinder_user");
+
+        if (!userData) {
+          showAccessDenied();
+          return;
+        }
+
+        const user = JSON.parse(userData);
+
+        // Check if user is FUNDER and active
+        const { data: userRecord, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (
+          error ||
+          !userRecord ||
+          userRecord.role !== "FUNDER" ||
+          !userRecord.active
+        ) {
+          showAccessDenied();
+          return;
+        }
+
+        // User is valid funder, show funder content
+        currentFunder = userRecord;
+        document.getElementById("userName").textContent = userRecord.email;
+        document.getElementById("user-avatar").textContent = userRecord.email
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("funderContent").style.display = "block";
+        document.getElementById(
+          "welcomeMessage"
+        ).textContent = `Welcome back, ${userRecord.email}!`;
+
+        await loadFunderData();
+      }
+
+      function showAccessDenied() {
+        document.getElementById("accessDenied").style.display = "block";
+        document.getElementById("funderContent").style.display = "none";
+      }
+
+      async function loadFunderData() {
+        try {
+          // Load funder's funding opportunities
+          const { data: funding, error: fundingError } = await supabase
+            .from("funding")
+            .select("*")
+            .eq("funder_id", currentFunder.id)
+            .order("created_at", { ascending: false });
+
+          if (fundingError) throw fundingError;
+          funderFunding = funding || [];
+
+          // Load applications for funder's funding opportunities
+          const fundingIds = funderFunding.map((f) => f.id);
+          if (fundingIds.length > 0) {
+            const { data: applications, error: appsError } = await supabase
+              .from("applications")
+              .select("*")
+              .in("funding_id", fundingIds);
+
+            if (!appsError) {
+              funderApplications = applications || [];
+            }
+          }
+
+          updateDashboardMetrics();
+          updateRecentActivity();
+        } catch (error) {
+          console.error("Error loading funder data:", error);
+        }
+      }
+
+      function updateDashboardMetrics() {
+        const totalFunding = funderFunding.length;
+        const activeFunding = funderFunding.filter(
+          (f) => f.status === "active"
+        ).length;
+        const totalApplications = funderApplications.length;
+        const pendingReviews = funderApplications.filter(
+          (a) => a.status === "pending"
+        ).length;
+        const approvedApplications = funderApplications.filter(
+          (a) => a.status === "approved"
+        ).length;
+        const successRate =
+          totalApplications > 0
+            ? Math.round((approvedApplications / totalApplications) * 100)
+            : 0;
+
+        document.getElementById("totalFunding").textContent = activeFunding;
+        document.getElementById("totalApplications").textContent =
+          totalApplications;
+        document.getElementById("pendingReviews").textContent = pendingReviews;
+        document.getElementById("successRate").textContent = `${successRate}%`;
+      }
+
+      function updateRecentActivity() {
+        const activityList = document.getElementById("activityList");
+
+        if (funderApplications.length === 0 && funderFunding.length === 0) {
+          activityList.innerHTML = `
+            <div class="no-data">
+              <p>No recent activity yet.</p>
+              <p>Create your first funding opportunity to get started!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Combine funding creation and application activities
+        const activities = [];
+
+        // Add funding creation activities
+        funderFunding.slice(0, 3).forEach((funding) => {
+          activities.push({
+            type: "funding_created",
+            message: `Created funding: "${funding.name}"`,
+            time: new Date(funding.created_at),
+            icon: "fas fa-plus",
+          });
+        });
+
+        // Add application activities
+        funderApplications.slice(0, 3).forEach((app) => {
+          activities.push({
+            type: "application_received",
+            message: `New application received for funding`,
+            time: new Date(app.created_at),
+            icon: "fas fa-file-alt",
+          });
+        });
+
+        // Sort by time and take latest 5
+        activities.sort((a, b) => b.time - a.time).slice(0, 5);
+
+        if (activities.length === 0) {
+          activityList.innerHTML = `
+            <div class="no-data">
+              <p>No recent activity yet.</p>
+            </div>
+          `;
+          return;
+        }
+
+        activityList.innerHTML = activities
+          .map(
+            (activity) => `
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="${activity.icon}"></i>
+            </div>
+            <div class="activity-content">
+              <p>${activity.message}</p>
+              <div class="activity-time">${formatTimeAgo(activity.time)}</div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function formatTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        if (diffDays === 1) return "Yesterday";
+        return `${diffDays} days ago`;
+      }
+
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

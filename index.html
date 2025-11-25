@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - AI Funding for SMMEs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* CSS Variables for Bright Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #ff6b35;
+        --color-orange-light: #ff8e53;
+        --color-green: #00c9a7;
+        --color-green-light: #5be8c9;
+        --color-purple: #845ec2;
+        --color-purple-light: #a178df;
+        --color-gray: #5a5a5a;
+        --color-gray-light: #f0f0f0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 20px;
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      /* Reset & Base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-body);
+        line-height: 1.6;
+        color: var(--color-gray);
+        background-color: var(--color-white);
+        font-weight: 500;
+        overflow-x: hidden;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: var(--font-heading);
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        line-height: 1.1;
+      }
+
+      h2 {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+      }
+
+      h3 {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+      }
+
+      p {
+        margin-bottom: 1.5rem;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      /* Utility Classes */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      .section {
+        padding: 5rem 0;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .mb-0 {
+        margin-bottom: 0;
+      }
+
+      /* Geometric Background Elements */
+      .bg-element {
+        position: absolute;
+        z-index: -1;
+        opacity: 0.7;
+      }
+
+      .bg-circle {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--color-purple-light) 0%,
+          transparent 70%
+        );
+        top: 10%;
+        right: 5%;
+      }
+
+      .bg-triangle {
+        width: 0;
+        height: 0;
+        border-left: 150px solid transparent;
+        border-right: 150px solid transparent;
+        border-bottom: 260px solid var(--color-green-light);
+        bottom: 10%;
+        left: 5%;
+        opacity: 0.4;
+        transform: rotate(25deg);
+      }
+
+      .bg-square {
+        width: 200px;
+        height: 200px;
+        background-color: var(--color-orange-light);
+        top: 60%;
+        right: 15%;
+        transform: rotate(45deg);
+        opacity: 0.3;
+      }
+
+      /* Navbar */
+      nav.navbar {
+        position: sticky;
+        top: 0;
+        background: var(--color-white);
+        padding: 1.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        box-shadow: var(--shadow-sm);
+      }
+
+      nav .logo {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        color: var(--color-purple);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      nav .logo-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--color-orange);
+        display: inline-block;
+      }
+
+      nav .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+
+      nav .nav-links a {
+        color: var(--color-gray);
+        font-weight: 600;
+        padding: 0.5rem 0;
+        position: relative;
+      }
+
+      nav .nav-links a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--color-orange),
+          var(--color-purple)
+        );
+        transition: var(--transition);
+        border-radius: var(--border-radius-sm);
+      }
+
+      nav .nav-links a:hover {
+        color: var(--color-purple);
+      }
+
+      nav .nav-links a:hover::after {
+        width: 100%;
+      }
+
+      /* Hero Section */
+      .hero {
+        position: relative;
+        padding: 8rem 0 6rem;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          var(--color-white) 0%,
+          var(--color-gray-light) 100%
+        );
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero-content h1 {
+        margin-bottom: 1.5rem;
+        background: linear-gradient(
+          135deg,
+          var(--color-purple) 0%,
+          var(--color-orange) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero-content p {
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        color: var(--color-gray);
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        text-align: center;
+        border: none;
+        border-radius: var(--border-radius-lg);
+        transition: var(--transition);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        transition: var(--transition);
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--color-orange) 0%,
+          var(--color-orange-light) 100%
+        );
+        color: white;
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn-secondary {
+        background: linear-gradient(
+          135deg,
+          var(--color-purple) 0%,
+          var(--color-purple-light) 100%
+        );
+        color: white;
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      /* Features Section */
+      .features {
+        position: relative;
+        background-color: var(--color-white);
+      }
+
+      .features h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: var(--color-purple);
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: var(--color-white);
+        padding: 2.5rem 2rem;
+        border-radius: var(--border-radius-lg);
+        transition: var(--transition);
+        position: relative;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        height: 100%;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(
+          135deg,
+          var(--color-orange),
+          var(--color-green),
+          var(--color-purple)
+        );
+        border-radius: var(--border-radius-lg);
+        z-index: -1;
+        opacity: 0;
+        transition: var(--transition);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .feature-card:hover::before {
+        opacity: 1;
+      }
+
+      .feature-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.75rem;
+        color: white;
+      }
+
+      .feature-card:nth-child(1) .feature-icon {
+        background: linear-gradient(
+          135deg,
+          var(--color-orange),
+          var(--color-orange-light)
+        );
+      }
+
+      .feature-card:nth-child(2) .feature-icon {
+        background: linear-gradient(
+          135deg,
+          var(--color-green),
+          var(--color-green-light)
+        );
+      }
+
+      .feature-card:nth-child(3) .feature-icon {
+        background: linear-gradient(
+          135deg,
+          var(--color-purple),
+          var(--color-purple-light)
+        );
+      }
+
+      .feature-card:nth-child(4) .feature-icon {
+        background: linear-gradient(
+          135deg,
+          var(--color-orange-light),
+          var(--color-purple-light)
+        );
+      }
+
+      .feature-card h3 {
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .feature-card p {
+        flex-grow: 1;
+      }
+
+      /* How It Works */
+      .how-it-works {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          var(--color-gray-light) 0%,
+          var(--color-white) 100%
+        );
+      }
+
+      .how-it-works h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: var(--color-green);
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        counter-reset: step-counter;
+      }
+
+      .step {
+        background: var(--color-white);
+        padding: 2.5rem 2rem;
+        border-radius: var(--border-radius-lg);
+        transition: var(--transition);
+        position: relative;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        border-top: 5px solid transparent;
+      }
+
+      .step:nth-child(1) {
+        border-top-color: var(--color-orange);
+      }
+
+      .step:nth-child(2) {
+        border-top-color: var(--color-green);
+      }
+
+      .step:nth-child(3) {
+        border-top-color: var(--color-purple);
+      }
+
+      .step:nth-child(4) {
+        border-top-color: var(--color-orange-light);
+      }
+
+      .step::before {
+        counter-increment: step-counter;
+        content: counter(step-counter);
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: var(--color-white);
+        color: var(--color-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1.25rem;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        border: 3px solid;
+      }
+
+      .step:nth-child(1)::before {
+        border-color: var(--color-orange);
+      }
+
+      .step:nth-child(2)::before {
+        border-color: var(--color-green);
+      }
+
+      .step:nth-child(3)::before {
+        border-color: var(--color-purple);
+      }
+
+      .step:nth-child(4)::before {
+        border-color: var(--color-orange-light);
+      }
+
+      .step:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .step h3 {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .step p {
+        color: var(--color-gray);
+      }
+
+      /* Footer */
+      footer {
+        background: linear-gradient(
+          135deg,
+          var(--color-purple) 0%,
+          var(--color-gray) 100%
+        );
+        color: var(--color-white);
+        text-align: center;
+        padding: 3rem 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--color-orange),
+          var(--color-green),
+          var(--color-purple)
+        );
+      }
+
+      footer p {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .section {
+          padding: 4rem 0;
+        }
+
+        nav.navbar {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem 0;
+        }
+
+        nav .nav-links {
+          gap: 1.5rem;
+        }
+
+        .hero {
+          padding: 6rem 0 4rem;
+        }
+
+        .hero-content p {
+          font-size: 1.125rem;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 300px;
+          justify-content: center;
+        }
+
+        .feature-grid,
+        .steps {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-content h1 {
+          font-size: 2.25rem;
+        }
+
+        .feature-card,
+        .step {
+          padding: 2rem 1.5rem;
+        }
+
+        .bg-element {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background Elements -->
+    <div class="bg-element bg-circle"></div>
+    <div class="bg-element bg-triangle"></div>
+    <div class="bg-element bg-square"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar container">
+      <div class="logo">
+        <span>FundFinder</span>
+        <span class="logo-dot"></span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Find Your Perfect Funding Match</h1>
+          <p>
+            FundFinder uses intelligent AI to connect South African SMMEs with
+            the right funding opportunities. Stop searching and start growing
+            with our smart matching technology.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="login.html" class="btn btn-primary">
+              <i class="fas fa-rocket"></i>
+              Get Started
+            </a>
+            <a href="funders.html" class="btn btn-secondary">
+              <i class="fas fa-search"></i>
+              Browse Funds
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="section features">
+      <div class="container">
+        <h2>Why FundFinder?</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3>Smart Matching</h3>
+            <p>
+              Our AI analyzes your business profile to find funding
+              opportunities that perfectly match your needs and qualifications.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3>AI Applications</h3>
+            <p>
+              Generate professional motivation letters and project summaries
+              tailored specifically to your business and funding requirements.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>Track Progress</h3>
+            <p>
+              Monitor your application status in real-time with our intuitive
+              dashboard. No more guessing games.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>Built for SMMEs</h3>
+            <p>
+              Designed specifically for South African small businesses to
+              simplify funding and accelerate growth.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section how-it-works">
+      <div class="container">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step">
+            <h3>Create Profile</h3>
+            <p>Tell us about your business and funding requirements.</p>
+          </div>
+          <div class="step">
+            <h3>AI Matching</h3>
+            <p>
+              Our intelligent system finds the best funding matches for your
+              business.
+            </p>
+          </div>
+          <div class="step">
+            <h3>Apply Easily</h3>
+            <p>Submit applications with AI-assisted completion.</p>
+          </div>
+          <div class="step">
+            <h3>Track & Grow</h3>
+            <p>Monitor your application progress and receive updates.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+      <div class="container">
+        <p>&copy; 2025 FundFinder. All rights reserved.</p>
+        <p>Empowering South African SMMEs with smart funding solutions</p>
+      </div>
+    </footer>
+  </body>
+</html>

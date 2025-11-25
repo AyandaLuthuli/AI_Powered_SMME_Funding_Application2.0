@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - My Funding (No status)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      /* (kept your original styling but trimmed here for readability) */
+      :root {
+        --primary: #2d2dff;
+        --muted: #666;
+        --card: #fff;
+        --bg: #f5f7fa;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Inter, system-ui, Arial;
+        background: var(--bg);
+        margin: 0;
+        color: #222;
+      }
+      .header {
+        background: var(--card);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .logo {
+        color: var(--primary);
+        font-weight: 700;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .nav-links {
+        display: flex;
+        gap: 1rem;
+      }
+      .user-menu {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+      }
+      .btn {
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        border: 0;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-secondary {
+        background: #6b7280;
+        color: #fff;
+      }
+      .tabs {
+        display: flex;
+        background: #fff;
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 0;
+      }
+      .tab {
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .tab.active {
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+      }
+      .tab-content {
+        display: none;
+        background: #fff;
+        padding: 1.25rem;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eaeaea;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      .criteria-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .criteria-tag {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+      }
+      .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: var(--muted);
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: #fff;
+        padding: 1.25rem;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 640px;
+        max-height: 90vh;
+        overflow: auto;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border-radius: 8px;
+        border: 1px solid #e6e9ee;
+        background: #fafafa;
+      }
+      @media (max-width: 768px) {
+        .filters {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i> FundFinder Funder
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem">
+        <nav class="nav-links">
+          <a href="funder-dashboard.html">Dashboard</a>
+          <a href="funder-funding.html" class="active">My Funding</a>
+          <a href="funder-applications.html">Applications</a>
+        </nav>
+
+        <div class="user-menu">
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <div
+              id="user-avatar"
+              style="
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: var(--primary);
+                color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+              "
+            >
+              F
+            </div>
+            <div id="userName" style="font-weight: 600">Funder</div>
+          </div>
+          <button
+            class="btn"
+            onclick="logout()"
+            style="background: #ff4757; color: #fff; border-radius: 8px"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div id="accessDenied" class="no-data" style="display: none">
+        <h3>Access Denied</h3>
+        <p>You need to be a registered funder to access this portal.</p>
+        <div style="margin-top: 1rem">
+          <a class="btn btn-primary" href="index.html">Go to Main Site</a>
+        </div>
+      </div>
+
+      <div id="funderContent" style="display: none">
+        <div class="page-header">
+          <h1 style="margin: 0; color: var(--primary)">
+            My Funding Opportunities
+          </h1>
+          <button class="btn btn-primary" onclick="openCreateFundingModal()">
+            <i class="fas fa-plus"></i> Create Funding
+          </button>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('active')">
+            Active Funding
+          </div>
+          <div class="tab" onclick="switchTab('all')">All Funding</div>
+          <div class="tab" onclick="switchTab('closed')">Closed</div>
+        </div>
+
+        <div id="activeTab" class="tab-content active">
+          <div class="filters">
+            <div>
+              <label for="sectorFilter" style="font-weight: 600; color: #444"
+                >Sector</label
+              >
+              <select id="sectorFilter" onchange="filterFunding()">
+                <option value="all">All Sectors</option>
+                <option value="technology">Technology</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="services">Services</option>
+                <option value="tourism">Tourism</option>
+              </select>
+            </div>
+            <div>
+              <label for="searchFunding" style="font-weight: 600; color: #444"
+                >Search</label
+              >
+              <input
+                id="searchFunding"
+                type="text"
+                placeholder="Search by name..."
+                oninput="filterFunding()"
+              />
+            </div>
+            <div style="flex: 1"></div>
+          </div>
+
+          <div class="table-container">
+            <div id="fundingTable">
+              <div class="no-data">Loading funding opportunities...</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="allTab" class="tab-content">
+          <div class="no-data">
+            Showing all funding opportunities (status not tracked in DB).
+          </div>
+          <div class="table-container" style="margin-top: 1rem">
+            <div id="fundingTableAll"></div>
+          </div>
+        </div>
+
+        <div id="closedTab" class="tab-content">
+          <div class="no-data">
+            This installation does not track 'closed' status. To support
+            closing, add a `status` column to the funding table.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Funding Modal -->
+    <div id="createFundingModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+          "
+        >
+          <h2 style="margin: 0; color: var(--primary)">
+            Create Funding Opportunity
+          </h2>
+          <button
+            class="btn"
+            onclick="closeCreateFundingModal()"
+            style="background: #eee"
+          >
+            Close
+          </button>
+        </div>
+
+        <form id="createFundingForm">
+          <div class="form-group">
+            <label for="fundingName">Funding Name *</label>
+            <input id="fundingName" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label for="fundingDescription">Description *</label>
+            <textarea
+              id="fundingDescription"
+              required
+              placeholder="Describe the funding opportunity..."
+            ></textarea>
+          </div>
+
+          <div
+            class="form-group"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+          >
+            <div>
+              <label for="fundingRegion" style="font-size: 0.9rem"
+                >Region</label
+              >
+              <select id="fundingRegion" required>
+                <option value="">Select Region</option>
+                <option value="Eastern Cape">Eastern Cape</option>
+                <option value="Free State">Free State</option>
+                <option value="Gauteng">Gauteng</option>
+                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                <option value="Limpopo">Limpopo</option>
+                <option value="Mpumalanga">Mpumalanga</option>
+                <option value="Northern Cape">Northern Cape</option>
+                <option value="North West">North West</option>
+                <option value="Western Cape">Western Cape</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fundingSector" style="font-size: 0.9rem"
+                >Sector</label
+              >
+              <select id="fundingSector" required>
+                <option value="">Select Sector</option>
+                <option value="technology">Technology</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="services">Services</option>
+                <option value="tourism">Tourism</option>
+                <option value="construction">Construction</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="education">Education</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amountRange">Funding Amount Range *</label>
+            <select id="amountRange" required>
+              <option value="">Select Amount Range</option>
+              <option value="R10k - R50k">R10k - R50k</option>
+              <option value="R50k - R100k">R50k - R100k</option>
+              <option value="R100k - R500k">R100k - R500k</option>
+              <option value="R500k - R1M">R500k - R1M</option>
+              <option value="R1M+">R1M+</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="requirements">Requirements *</label>
+            <textarea
+              id="requirements"
+              required
+              placeholder="e.g., CIPC registration, Tax Clearance, Business Plan"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="deadline">Application Deadline</label>
+            <input id="deadline" type="date" />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              gap: 0.75rem;
+              justify-content: flex-end;
+              margin-top: 1rem;
+            "
+          >
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeCreateFundingModal()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Create Funding Opportunity
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // ---------------------------
+      // Configuration
+      // ---------------------------
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      // State
+      let currentFunder = null;
+      let funderFunding = []; // local cache of rows
+
+      // DOM
+      const funderContent = document.getElementById("funderContent");
+      const fundingTable = document.getElementById("fundingTable");
+      const fundingTableAll = document.getElementById("fundingTableAll");
+
+      // Init
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          await checkFunderAuth();
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      // ---------------------------
+      // Auth & initial load
+      // ---------------------------
+      async function checkFunderAuth() {
+        const userData = localStorage.getItem("fundfinder_user");
+        if (!userData) return showAccessDenied();
+        const user = JSON.parse(userData);
+
+        const { data: userRecord, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (
+          error ||
+          !userRecord ||
+          userRecord.role !== "FUNDER" ||
+          !userRecord.active
+        ) {
+          return showAccessDenied();
+        }
+
+        currentFunder = userRecord;
+        document.getElementById("userName").textContent = currentFunder.email;
+        document.getElementById("user-avatar").textContent = currentFunder.email
+          .charAt(0)
+          .toUpperCase();
+        funderContent.style.display = "block";
+
+        await loadFunderFunding();
+
+        // handle ?action=create
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("action") === "create") openCreateFundingModal();
+      }
+
+      function showAccessDenied() {
+        document.getElementById("accessDenied").style.display = "block";
+        funderContent.style.display = "none";
+      }
+
+      // ---------------------------
+      // Load funding for this funder
+      // ---------------------------
+      async function loadFunderFunding() {
+        fundingTable.innerHTML =
+          '<div class="no-data">Loading funding opportunities...</div>';
+        try {
+          const { data: funding, error } = await supabase
+            .from("funding")
+            .select("*")
+            .eq("funder_id", currentFunder.id)
+            .order("created_at", { ascending: false });
+
+          if (error) throw error;
+          funderFunding = funding || [];
+          // active tab will show all because we don't have status
+          displayFunding(funderFunding);
+          displayFundingAll(funderFunding);
+        } catch (err) {
+          console.error("Error loading funding data:", err);
+          fundingTable.innerHTML =
+            '<div class="no-data"><p>Error loading funding opportunities. Please try again later.</p></div>';
+          fundingTableAll.innerHTML = fundingTable.innerHTML;
+        }
+      }
+
+      // ---------------------------
+      // Display functions
+      // ---------------------------
+      function displayFunding(list) {
+        if (!list || list.length === 0) {
+          fundingTable.innerHTML = `
+            <div class="no-data">
+              <p>No funding opportunities found.</p>
+              <button class="btn btn-primary" onclick="openCreateFundingModal()"><i class="fas fa-plus"></i> Create Your First Funding Opportunity</button>
+            </div>`;
+          return;
+        }
+
+        fundingTable.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Funding Opportunity</th>
+                <th>Criteria</th>
+                <th>Applications</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list
+                .map((opp) => {
+                  const c = opp.criteria || {};
+                  const description = (opp.description || "").substring(0, 60);
+                  return `
+                  <tr>
+                    <td>
+                      <div style="font-weight:600">${escapeHtml(opp.name)}</div>
+                      <div style="font-size:0.8rem;color:#666">${escapeHtml(
+                        description
+                      )}${
+                    opp.description && opp.description.length > 60 ? "..." : ""
+                  }</div>
+                    </td>
+                    <td>
+                      <div style="font-weight:500">${escapeHtml(
+                        c.sector || "General"
+                      )}</div>
+                      <div class="criteria-tags" style="margin-top:.5rem">
+                        <span class="criteria-tag">${escapeHtml(
+                          c.region || "National"
+                        )}</span>
+                        <span class="criteria-tag">${escapeHtml(
+                          c.amount_range || "Flexible"
+                        )}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="font-weight:600;color:var(--primary)">${
+                        Math.floor(Math.random() * 20) + 5
+                      }</div>
+                      <div style="font-size:0.8rem;color:#666">applications</div>
+                    </td>
+                    <td>${new Date(opp.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <div style="display:flex;gap:.5rem">
+                        <button class="btn btn-secondary" onclick="viewFundingDetails('${
+                          opp.id
+                        }')"><i class="fas fa-eye"></i> View</button>
+                        <button class="btn btn-danger" onclick="deleteFunding('${
+                          opp.id
+                        }')"><i class="fas fa-trash"></i> Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+                })
+                .join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function displayFundingAll(list) {
+        if (!list || list.length === 0) {
+          fundingTableAll.innerHTML =
+            '<div class="no-data"><p>No funding opportunities.</p></div>';
+          return;
+        }
+        // reuse same table markup (but in the 'all' panel)
+        fundingTableAll.innerHTML =
+          document.getElementById("fundingTable").innerHTML;
+      }
+
+      // ---------------------------
+      // Tabs & Filtering (no status)
+      // ---------------------------
+      function switchTab(tabName) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+
+        const tabEl = document.getElementById(`${tabName}Tab`);
+        if (tabEl) tabEl.classList.add("active");
+
+        const tabButton = Array.from(document.querySelectorAll(".tab")).find(
+          (el) => el.getAttribute("onclick")?.includes(`'${tabName}'`)
+        );
+        if (tabButton) tabButton.classList.add("active");
+
+        // active & all will show same data (since status isn't tracked)
+        if (tabName === "active" || tabName === "all") {
+          displayFunding(funderFunding);
+          displayFundingAll(funderFunding);
+        } else if (tabName === "closed") {
+          // can't show closed because no status column exists
+          document.getElementById("closedTab").innerHTML =
+            '<div class="no-data"><p>Closed items are not tracked (no status column in DB).</p><p>If you want close/archiving, add a `status` column to `public.funding`.</p></div>';
+        }
+      }
+
+      function filterFunding() {
+        const sectorFilter = document.getElementById("sectorFilter").value;
+        const searchFilter = document
+          .getElementById("searchFunding")
+          .value.trim()
+          .toLowerCase();
+
+        let filtered = funderFunding.slice();
+
+        if (sectorFilter && sectorFilter !== "all") {
+          filtered = filtered.filter(
+            (opp) =>
+              (opp.criteria?.sector || "General").toLowerCase() === sectorFilter
+          );
+        }
+        if (searchFilter) {
+          filtered = filtered.filter(
+            (opp) =>
+              (opp.name || "").toLowerCase().includes(searchFilter) ||
+              (opp.description || "").toLowerCase().includes(searchFilter)
+          );
+        }
+
+        displayFunding(filtered);
+      }
+
+      // ---------------------------
+      // Create Funding (insert into DB)
+      // ---------------------------
+      function openCreateFundingModal() {
+        document.getElementById("createFundingModal").classList.add("active");
+      }
+
+      function closeCreateFundingModal() {
+        document
+          .getElementById("createFundingModal")
+          .classList.remove("active");
+        document.getElementById("createFundingForm").reset();
+      }
+
+      document
+        .getElementById("createFundingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!currentFunder) {
+            alert("Funder not identified");
+            return;
+          }
+
+          const name = document.getElementById("fundingName").value.trim();
+          const description = document
+            .getElementById("fundingDescription")
+            .value.trim();
+          const region = document.getElementById("fundingRegion").value;
+          const sector = document.getElementById("fundingSector").value;
+          const amount_range = document.getElementById("amountRange").value;
+          const requirements = document
+            .getElementById("requirements")
+            .value.trim();
+          const deadline = document.getElementById("deadline").value || null;
+
+          // build criteria JSON (keeps your previously used structure)
+          const criteria = {
+            region,
+            sector,
+            amount_range,
+            requirements,
+            match_reasons: [],
+          };
+          if (deadline) criteria.deadline = deadline;
+
+          const record = {
+            funder_id: currentFunder.id,
+            name,
+            description,
+            criteria,
+          };
+
+          try {
+            const { data, error } = await supabase
+              .from("funding")
+              .insert([record])
+              .select(); // request the inserted row back
+
+            if (error) throw error;
+            const inserted = data && data[0] ? data[0] : null;
+            if (inserted) {
+              funderFunding.unshift(inserted);
+              displayFunding(funderFunding);
+              displayFundingAll(funderFunding);
+              closeCreateFundingModal();
+              alert("Funding opportunity created successfully!");
+            } else {
+              // If select() returned nothing (rare), reload list
+              await loadFunderFunding();
+              closeCreateFundingModal();
+              alert("Funding opportunity created (refreshing).");
+            }
+          } catch (err) {
+            console.error("Error creating funding opportunity:", err);
+            alert(
+              "Error creating funding opportunity. See console for details."
+            );
+          }
+        });
+
+      // ---------------------------
+      // View / Delete helpers
+      // ---------------------------
+      function viewFundingDetails(id) {
+        const f = funderFunding.find((x) => x.id === id);
+        if (!f) {
+          alert("Funding not found");
+          return;
+        }
+        const c = f.criteria || {};
+        const details = `
+Name: ${f.name}
+Description: ${f.description || "—"}
+
+Criteria:
+ - Region: ${c.region || "National"}
+ - Sector: ${c.sector || "General"}
+ - Amount Range: ${c.amount_range || "Flexible"}
+ - Requirements: ${c.requirements || "None specified"}
+
+Created: ${new Date(f.created_at).toLocaleString()}
+        `;
+        alert(details);
+      }
+
+      async function deleteFunding(id) {
+        if (
+          !confirm(
+            "Are you sure you want to delete this funding opportunity? This action cannot be undone."
+          )
+        )
+          return;
+        try {
+          const { error } = await supabase
+            .from("funding")
+            .delete()
+            .eq("id", id);
+          if (error) throw error;
+          funderFunding = funderFunding.filter((x) => x.id !== id);
+          displayFunding(funderFunding);
+          displayFundingAll(funderFunding);
+          alert("Funding opportunity deleted.");
+        } catch (err) {
+          console.error("Error deleting funding opportunity:", err);
+          alert("Error deleting funding opportunity. See console for details.");
+        }
+      }
+
+      // ---------------------------
+      // Utilities
+      // ---------------------------
+      function escapeHtml(s) {
+        if (s === null || s === undefined) return "";
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

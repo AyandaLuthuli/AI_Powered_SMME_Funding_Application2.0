@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - AI-Powered Funding Opportunities</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2d2dff, #667eea);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        color: #2d2dff;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-header p {
+        color: #666;
+        font-size: 1.2rem;
+      }
+
+      /* Profile Summary */
+      .profile-summary {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .profile-summary h2 {
+        color: #2d2dff;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .criteria-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .criteria-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #2d2dff;
+      }
+
+      .criteria-item strong {
+        color: #333;
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+      }
+
+      .profile-actions {
+        margin-top: 1.5rem;
+        text-align: right;
+      }
+
+      /* AI Matching Section */
+      .ai-matching-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .ai-matching-header h2 {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .matching-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .stat-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      /* Funding Opportunities */
+      .opportunities-container {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .opportunity-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 2px solid transparent;
+        position: relative;
+      }
+
+      .opportunity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .opportunity-card.high-match {
+        border-color: #10b981;
+      }
+
+      .opportunity-card.medium-match {
+        border-color: #f59e0b;
+      }
+
+      .opportunity-card.low-match {
+        border-color: #ef4444;
+      }
+
+      .opportunity-badge {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        background: #2d2dff;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .opportunity-badge.special {
+        background: #8b5cf6;
+      }
+
+      .opportunity-badge.regional {
+        background: #06b6d4;
+      }
+
+      .opportunity-badge.sector {
+        background: #10b981;
+      }
+
+      .opportunity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+      }
+
+      .opportunity-title {
+        flex: 1;
+      }
+
+      .opportunity-title h3 {
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+        font-size: 1.4rem;
+      }
+
+      .match-badge {
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .match-badge.high {
+        background: #10b981;
+      }
+      .match-badge.medium {
+        background: #f59e0b;
+      }
+      .match-badge.low {
+        background: #ef4444;
+      }
+
+      .opportunity-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .detail-item {
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+      }
+
+      .detail-item strong {
+        color: #666;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 0.25rem;
+      }
+
+      .match-analysis {
+        background: #e6f7ee;
+        border: 1px solid #a3e9c0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .match-analysis h4 {
+        color: #0a7b3e;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .match-reasons {
+        color: #0a7b3e;
+        line-height: 1.6;
+      }
+
+      .ai-suggestions {
+        background: #e6f3ff;
+        border: 1px solid #a3d0ff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .ai-suggestions h4 {
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .ai-suggestions ul {
+        list-style: none;
+        padding-left: 0;
+        color: #1e40af;
+      }
+
+      .ai-suggestions li {
+        padding: 0.25rem 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .ai-suggestions li i {
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+      }
+
+      .opportunity-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-align: center;
+      }
+
+      .btn-primary {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #333;
+        border: 2px solid #e0e0e0;
+      }
+
+      .btn-secondary:hover {
+        background: #e9ecef;
+      }
+
+      .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2d2dff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 3rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .criteria-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .criteria-tag {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      .funding-type-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .funding-type-indicator i {
+        color: #2d2dff;
+      }
+
+      /* Application Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .modal-header h2 {
+        color: #2d2dff;
+        font-size: 1.5rem;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+      }
+
+      .close-modal:hover {
+        color: #333;
+      }
+
+      .application-info {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+      }
+
+      .application-info h3 {
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #444;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        background: #fafafa;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #2d2dff;
+        background: #fff;
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: "Inter", sans-serif;
+      }
+
+      .ai-generated-section {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .ai-generated-section h4 {
+        color: #0369a1;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .ai-generated-text {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 6px;
+        min-height: 120px;
+        white-space: pre-wrap;
+        border: 1px solid #e0e0e0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      /* File Upload Styles */
+      .file-upload-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .file-upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .file-upload-area:hover {
+        border-color: #2d2dff;
+        background: #f0f9ff;
+      }
+
+      .file-upload-area.dragover {
+        border-color: #2d2dff;
+        background: #e0f2fe;
+      }
+
+      .file-upload-icon {
+        font-size: 2rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .file-list {
+        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+      }
+
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+      }
+
+      .file-icon {
+        color: #ef4444;
+        font-size: 1.2rem;
+      }
+
+      .file-name {
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .file-size {
+        color: #6b7280;
+        font-size: 0.8rem;
+      }
+
+      .file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+      }
+
+      .file-remove:hover {
+        background: #fef2f2;
+      }
+
+      .upload-hint {
+        color: #6b7280;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+      }
+
+      .terms-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .terms-checkbox input {
+        margin-top: 0.2rem;
+      }
+
+      .terms-checkbox label {
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .btn-full {
+        width: 100%;
+        justify-content: center;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .opportunity-header {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .opportunity-actions {
+          flex-direction: column;
+        }
+
+        .criteria-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .matching-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .modal-content {
+          padding: 1.5rem;
+        }
+
+        .form-actions {
+          flex-direction: column;
+        }
+
+        .file-upload-area {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder
+      </div>
+      <div class="nav-links">
+        <a href="smme-dashboard.html">Dashboard</a>
+        <a href="smme-profile.html">My Profile</a>
+        <a href="smme-funding-opportunities.html" class="active"
+          >Find Opportunities</a
+        >
+        <a href="smme-applications.html">My Applications</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">S</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Welcome!</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="page-header">
+        <h1>🤖 AI-Powered Funding Matches</h1>
+        <p>
+          Our AI analyzes your business criteria to find the perfect funding
+          opportunities
+        </p>
+      </div>
+
+      <!-- Business Profile Summary -->
+      <div class="profile-summary">
+        <h2><i class="fas fa-building"></i> Your Business Criteria</h2>
+        <div id="profileCriteria">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <div class="profile-actions">
+          <a href="smme-profile.html" class="btn btn-secondary btn-small">
+            <i class="fas fa-edit"></i> Update Criteria
+          </a>
+        </div>
+      </div>
+
+      <!-- AI Matching Header -->
+      <div
+        class="ai-matching-header"
+        id="aiMatchingHeader"
+        style="display: none"
+      >
+        <h2><i class="fas fa-robot"></i> AI Matching Results</h2>
+        <p>
+          Based on your business criteria, here are your best funding matches
+        </p>
+        <div class="matching-stats" id="matchingStats">
+          <!-- Stats will be populated here -->
+        </div>
+      </div>
+
+      <!-- Funding Opportunities -->
+      <div class="opportunities-container" id="opportunitiesContainer">
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>
+            🤖 AI is analyzing your criteria and finding the best funding
+            matches...
+          </p>
+          <p>
+            <small
+              >This may take a few moments as we analyze criteria
+              matching</small
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Apply for Funding</h2>
+          <button class="close-modal" onclick="closeApplicationModal()">
+            &times;
+          </button>
+        </div>
+
+        <div class="application-info" id="applicationInfo">
+          <!-- Funding opportunity info will be loaded here -->
+        </div>
+
+        <form id="applicationForm">
+          <div class="form-group">
+            <label for="requestedAmount">Requested Amount (ZAR) *</label>
+            <input
+              type="number"
+              id="requestedAmount"
+              name="requestedAmount"
+              required
+              placeholder="Enter the amount you're requesting"
+            />
+          </div>
+
+          <!-- AI-Generated Project Summary -->
+          <div class="ai-generated-section">
+            <h4><i class="fas fa-robot"></i> AI-Generated Project Summary</h4>
+            <div class="ai-generated-text" id="projectSummaryText">
+              Generating project summary...
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-full"
+              onclick="regenerateProjectSummary()"
+              style="margin-top: 0.5rem"
+            >
+              <i class="fas fa-sync-alt"></i> Regenerate Project Summary
+            </button>
+          </div>
+
+          <!-- AI-Generated Motivation Letter -->
+          <div class="ai-generated-section">
+            <h4><i class="fas fa-robot"></i> AI-Generated Motivation Letter</h4>
+            <div class="ai-generated-text" id="motivationText">
+              Generating motivation letter...
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-full"
+              onclick="regenerateMotivation()"
+              style="margin-top: 0.5rem"
+            >
+              <i class="fas fa-sync-alt"></i> Regenerate Motivation Letter
+            </button>
+          </div>
+
+          <!-- File Upload Section -->
+          <div class="file-upload-section">
+            <label>Supporting Documents (PDF files only)</label>
+            <div
+              class="file-upload-area"
+              id="fileUploadArea"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              <div class="file-upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <h4>Upload Supporting Documents</h4>
+              <p>Click to browse or drag and drop PDF files here</p>
+              <p class="upload-hint">
+                Maximum 5 files • PDF only • 10MB per file
+              </p>
+              <input
+                type="file"
+                id="fileInput"
+                class="file-input"
+                accept=".pdf"
+                multiple
+                onchange="handleFileSelect(event)"
+              />
+            </div>
+            <div class="file-list" id="fileList">
+              <!-- Uploaded files will appear here -->
+            </div>
+          </div>
+
+          <div class="terms-checkbox">
+            <input
+              type="checkbox"
+              id="termsAccepted"
+              name="termsAccepted"
+              required
+            />
+            <label for="termsAccepted">
+              I accept the terms and conditions and confirm the information
+              provided is accurate. I understand that this application will be
+              reviewed by the funding provider and that supporting documents are
+              for review purposes only.
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary btn-full"
+              onclick="closeApplicationModal()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary btn-full">
+              <i class="fas fa-paper-plane"></i> Submit Application
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Configuration
+      const GEMINI_API_KEY = "AIzaSyCixpv02sanUBs4YqxX6p8CrMfeQeVToyg";
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      console.log("🚀 Initializing Supabase client...");
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      // DOM elements
+      const profileCriteria = document.getElementById("profileCriteria");
+      const opportunitiesContainer = document.getElementById(
+        "opportunitiesContainer"
+      );
+      const loading = document.getElementById("loading");
+      const aiMatchingHeader = document.getElementById("aiMatchingHeader");
+      const matchingStats = document.getElementById("matchingStats");
+      const userName = document.getElementById("userName");
+      const userAvatar = document.getElementById("user-avatar");
+      const applicationModal = document.getElementById("applicationModal");
+      const modalTitle = document.getElementById("modalTitle");
+      const applicationInfo = document.getElementById("applicationInfo");
+      const applicationForm = document.getElementById("applicationForm");
+      const motivationText = document.getElementById("motivationText");
+      const projectSummaryText = document.getElementById("projectSummaryText");
+      const fileUploadArea = document.getElementById("fileUploadArea");
+      const fileInput = document.getElementById("fileInput");
+      const fileList = document.getElementById("fileList");
+
+      // Global variables
+      let currentUser = null;
+      let currentProfile = null;
+      let currentFundingOpportunity = null;
+      let allFundingOpportunities = [];
+      let uploadedFiles = [];
+
+      // Check authentication and load data
+      document.addEventListener("DOMContentLoaded", async () => {
+        console.log("📄 Page loaded, starting authentication check...");
+        await checkAuth();
+        await loadProfileAndOpportunities();
+
+        // Initialize file upload drag and drop
+        initializeFileUpload();
+      });
+
+      async function checkAuth() {
+        console.log("🔐 Checking authentication...");
+        const userData = localStorage.getItem("fundfinder_user");
+
+        if (!userData) {
+          console.log("❌ No user data found, redirecting to login...");
+          window.location.href = "login.html";
+          return;
+        }
+
+        const user = JSON.parse(userData);
+        currentUser = user;
+        userName.textContent = user.email.split("@")[0];
+        userAvatar.textContent = user.email.charAt(0).toUpperCase();
+        console.log("✅ User authenticated:", user.email);
+      }
+
+      async function loadProfileAndOpportunities() {
+        console.log("📊 Loading profile and opportunities...");
+        const userData = JSON.parse(localStorage.getItem("fundfinder_user"));
+
+        try {
+          // Load SMME profile with criteria
+          console.log("👤 Loading SMME profile with criteria...");
+          const { data: profile, error: profileError } = await supabase
+            .from("smmes")
+            .select("*")
+            .eq("user_id", userData.id)
+            .single();
+
+          if (profileError || !profile) {
+            console.log(
+              "❌ No profile found, redirecting to profile creation..."
+            );
+            window.location.href = "smme-profile.html";
+            return;
+          }
+
+          console.log("✅ Profile loaded:", profile.business_name);
+          currentProfile = profile;
+          displayProfileCriteria(profile);
+
+          // Load funding opportunities with criteria
+          console.log("💰 Loading funding opportunities with criteria...");
+          const { data: fundingOpportunities, error: fundingError } =
+            await supabase.from("funding").select("*");
+
+          if (fundingError) {
+            console.error(
+              "❌ Error loading funding opportunities:",
+              fundingError
+            );
+            throw fundingError;
+          }
+
+          console.log(
+            `✅ Loaded ${fundingOpportunities.length} funding opportunities`
+          );
+          allFundingOpportunities = fundingOpportunities;
+
+          // Use AI for intelligent matching based on criteria
+          console.log("🤖 Starting AI criteria matching...");
+          const matchingResults = await matchWithAI(
+            profile,
+            fundingOpportunities
+          );
+
+          console.log("✅ AI matching completed:", matchingResults);
+
+          // Display matching results
+          displayMatchingResults(matchingResults);
+          displayOpportunities(matchingResults.matchedOpportunities);
+        } catch (error) {
+          console.error("❌ Error loading data:", error);
+          opportunitiesContainer.innerHTML = `
+            <div class="no-results">
+              <h3>Error loading opportunities</h3>
+              <p>Please try refreshing the page</p>
+              <button class="btn btn-primary" onclick="location.reload()">
+                <i class="fas fa-redo"></i> Refresh Page
+              </button>
+            </div>
+          `;
+        } finally {
+          loading.style.display = "none";
+          console.log("🏁 Loading complete");
+        }
+      }
+
+      function displayProfileCriteria(profile) {
+        console.log("📋 Displaying profile criteria...");
+
+        let criteriaHTML = "";
+
+        if (profile.criteria) {
+          // Display structured criteria
+          criteriaHTML = `
+            <div class="criteria-grid">
+              ${
+                profile.criteria.sector
+                  ? `
+                <div class="criteria-item">
+                  <strong>Business Sector</strong>
+                  <span>${profile.criteria.sector}</span>
+                </div>
+              `
+                  : ""
+              }
+              
+              ${
+                profile.criteria.region
+                  ? `
+                <div class="criteria-item">
+                  <strong>Operating Region</strong>
+                  <span>${profile.criteria.region}</span>
+                </div>
+              `
+                  : ""
+              }
+              
+              ${
+                profile.criteria.funding_amount_min
+                  ? `
+                <div class="criteria-item">
+                  <strong>Funding Needed</strong>
+                  <span>R${profile.criteria.funding_amount_min.toLocaleString()} - R${
+                      profile.criteria.funding_amount_max
+                        ? profile.criteria.funding_amount_max.toLocaleString()
+                        : "Open"
+                    }</span>
+                </div>
+              `
+                  : ""
+              }
+              
+              ${
+                profile.criteria.business_stage
+                  ? `
+                <div class="criteria-item">
+                  <strong>Business Stage</strong>
+                  <span>${profile.criteria.business_stage}</span>
+                </div>
+              `
+                  : ""
+              }
+
+              ${
+                profile.criteria.employees
+                  ? `
+                <div class="criteria-item">
+                  <strong>Employees</strong>
+                  <span>${profile.criteria.employees}</span>
+                </div>
+              `
+                  : ""
+              }
+
+              ${
+                profile.criteria.years_in_operation
+                  ? `
+                <div class="criteria-item">
+                  <strong>Years in Operation</strong>
+                  <span>${profile.criteria.years_in_operation}</span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+        } else {
+          // Fallback to basic profile info
+          criteriaHTML = `
+            <div class="criteria-grid">
+              <div class="criteria-item">
+                <strong>Business Sector</strong>
+                <span>${profile.business_sector}</span>
+              </div>
+              <div class="criteria-item">
+                <strong>Operating Region</strong>
+                <span>${profile.region}</span>
+              </div>
+              <div class="criteria-item">
+                <strong>Years in Operation</strong>
+                <span>${profile.years_in_operation} years</span>
+              </div>
+              <div class="criteria-item">
+                <strong>Business Stage</strong>
+                <span>${
+                  profile.years_in_operation > 3 ? "Established" : "Growing"
+                }</span>
+              </div>
+              ${
+                profile.number_of_employees
+                  ? `
+                <div class="criteria-item">
+                  <strong>Employees</strong>
+                  <span>${profile.number_of_employees}</span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+        }
+
+        profileCriteria.innerHTML = criteriaHTML;
+      }
+
+      async function matchWithAI(profile, opportunities) {
+        console.log("🔍 Starting AI matching...");
+
+        // Prepare criteria data
+        const smmeCriteria = profile.criteria || {
+          sector: profile.business_sector,
+          region: profile.region,
+          business_stage:
+            profile.years_in_operation > 3 ? "established" : "startup",
+          years_in_operation: profile.years_in_operation,
+          employees: profile.number_of_employees,
+          revenue: profile.annual_revenue,
+        };
+
+        const matchedOpportunities = [];
+
+        for (const opportunity of opportunities) {
+          if (!opportunity.criteria) continue;
+
+          let matchScore = 0;
+          let matchReasoning = "";
+          const aiSuggestions = [];
+
+          // Enhanced criteria matching logic
+          const funderCriteria = opportunity.criteria;
+
+          // Sector matching
+          if (funderCriteria.sector && smmeCriteria.sector) {
+            const profileSector = smmeCriteria.sector.toLowerCase();
+            const funderSector = funderCriteria.sector.toLowerCase();
+
+            if (funderSector === "any" || funderSector === "all") {
+              matchScore += 20;
+              matchReasoning += "Sector-agnostic funding. ";
+            } else if (
+              funderSector.includes(profileSector) ||
+              profileSector.includes(funderSector)
+            ) {
+              matchScore += 30;
+              matchReasoning += `Perfect sector match (${smmeCriteria.sector}). `;
+            } else if (checkSectorCompatibility(profileSector, funderSector)) {
+              matchScore += 15;
+              matchReasoning += `Compatible sector match. `;
+            }
+          }
+
+          // Region matching
+          if (funderCriteria.region && smmeCriteria.region) {
+            const profileRegion = smmeCriteria.region.toLowerCase();
+            const funderRegion = funderCriteria.region.toLowerCase();
+
+            if (
+              funderRegion === "national" ||
+              funderRegion === "south africa"
+            ) {
+              matchScore += 25;
+              matchReasoning += "National funding coverage. ";
+            } else if (
+              funderRegion.includes(profileRegion) ||
+              profileRegion.includes(funderRegion)
+            ) {
+              matchScore += 25;
+              matchReasoning += `Perfect regional match (${smmeCriteria.region}). `;
+            }
+          }
+
+          // Business stage matching
+          if (funderCriteria.business_stage && smmeCriteria.business_stage) {
+            const profileStage = smmeCriteria.business_stage.toLowerCase();
+            const funderStage = funderCriteria.business_stage.toLowerCase();
+
+            if (
+              funderStage === "any" ||
+              funderStage.includes(profileStage) ||
+              profileStage.includes(funderStage)
+            ) {
+              matchScore += 15;
+              matchReasoning += `Appropriate business stage (${smmeCriteria.business_stage}). `;
+            }
+          }
+
+          // Funding amount matching
+          if (
+            funderCriteria.funding_amount_min &&
+            smmeCriteria.funding_amount_min
+          ) {
+            const neededMin = parseFloat(smmeCriteria.funding_amount_min);
+            const offeredMin = parseFloat(funderCriteria.funding_amount_min);
+            const offeredMax =
+              parseFloat(funderCriteria.funding_amount_max) || Infinity;
+
+            if (neededMin >= offeredMin && neededMin <= offeredMax) {
+              matchScore += 20;
+              matchReasoning += "Funding amount aligns with needs. ";
+            } else if (neededMin <= offeredMax) {
+              matchScore += 10;
+              matchReasoning += "Funding amount partially matches. ";
+              aiSuggestions.push(
+                "Consider adjusting your funding request to better match this opportunity"
+              );
+            }
+          }
+
+          // Employee count matching
+          if (funderCriteria.employees_min && smmeCriteria.employees) {
+            if (smmeCriteria.employees >= funderCriteria.employees_min) {
+              matchScore += 5;
+              matchReasoning += "Meets employee requirements. ";
+            }
+          }
+
+          // Years in operation matching
+          if (
+            funderCriteria.years_in_operation_min &&
+            smmeCriteria.years_in_operation
+          ) {
+            if (
+              smmeCriteria.years_in_operation >=
+              funderCriteria.years_in_operation_min
+            ) {
+              matchScore += 5;
+              matchReasoning += "Meets business experience requirements. ";
+            }
+          }
+
+          // Special program matching (women, youth, etc.)
+          if (funderCriteria.owner_gender === "female") {
+            aiSuggestions.push(
+              "This fund specifically supports women entrepreneurs - highlight your unique perspective"
+            );
+            matchScore += 10;
+          }
+
+          if (funderCriteria.owner_age_max === 35) {
+            aiSuggestions.push(
+              "This youth fund values innovation and fresh ideas - emphasize your unique approach"
+            );
+            matchScore += 10;
+          }
+
+          // Additional matching factors
+          if (smmeCriteria.years_in_operation >= 3) {
+            matchScore += 5;
+            aiSuggestions.push(
+              "Highlight your business experience and stability"
+            );
+          }
+
+          if (smmeCriteria.employees > 5) {
+            matchScore += 5;
+            aiSuggestions.push("Emphasize job creation and team strength");
+          }
+
+          // Ensure score is within bounds and add to results if above threshold
+          matchScore = Math.min(Math.max(matchScore, 0), 100);
+
+          if (matchScore >= 20) {
+            // Lower threshold to show more opportunities
+            matchedOpportunities.push({
+              ...opportunity,
+              matchScore: matchScore,
+              matchReasoning:
+                matchReasoning ||
+                "Good overall fit based on criteria analysis.",
+              aiSuggestions:
+                aiSuggestions.length > 0
+                  ? aiSuggestions
+                  : [
+                      "Provide detailed financial projections",
+                      "Include market research and customer validation",
+                      "Clearly articulate your competitive advantage",
+                    ],
+            });
+          }
+        }
+
+        console.log(
+          `✅ AI matching found ${matchedOpportunities.length} opportunities`
+        );
+
+        return {
+          totalOpportunities: opportunities.length,
+          matchedCount: matchedOpportunities.length,
+          averageMatchScore:
+            matchedOpportunities.length > 0
+              ? matchedOpportunities.reduce(
+                  (sum, opp) => sum + opp.matchScore,
+                  0
+                ) / matchedOpportunities.length
+              : 0,
+          matchedOpportunities: matchedOpportunities.sort(
+            (a, b) => b.matchScore - a.matchScore
+          ),
+        };
+      }
+
+      // Helper function for sector compatibility
+      function checkSectorCompatibility(profileSector, funderSector) {
+        const sectorGroups = {
+          technology: [
+            "tech",
+            "software",
+            "hardware",
+            "it",
+            "digital",
+            "innovation",
+          ],
+          manufacturing: ["production", "factory", "industrial", "assembly"],
+          services: [
+            "consulting",
+            "professional",
+            "business services",
+            "support",
+          ],
+          retail: ["ecommerce", "consumer goods", "sales", "distribution"],
+          agriculture: ["farming", "agri", "food production", "rural"],
+          tourism: ["hospitality", "travel", "accommodation", "tourism"],
+          healthcare: ["medical", "clinic", "wellness", "pharmacy", "health"],
+          energy: ["renewable", "solar", "wind", "green", "sustainability"],
+        };
+
+        for (const [group, sectors] of Object.entries(sectorGroups)) {
+          if (
+            sectors.includes(profileSector) &&
+            sectors.includes(funderSector)
+          ) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function getFundingTypeBadge(opportunity) {
+        const criteria = opportunity.criteria || {};
+
+        if (criteria.owner_gender === "female") {
+          return { type: "special", label: "Women-Focused", class: "special" };
+        }
+        if (criteria.owner_age_max === 35) {
+          return { type: "special", label: "Youth Program", class: "special" };
+        }
+        if (criteria.region && criteria.region !== "national") {
+          return {
+            type: "regional",
+            label: "Regional Fund",
+            class: "regional",
+          };
+        }
+        if (criteria.sector && criteria.sector !== "any") {
+          return { type: "sector", label: "Sector-Specific", class: "sector" };
+        }
+
+        return null;
+      }
+
+      function getFundingTypeIcon(opportunity) {
+        const criteria = opportunity.criteria || {};
+        const name = opportunity.name.toLowerCase();
+
+        if (criteria.owner_gender === "female") return "fas fa-female";
+        if (criteria.owner_age_max === 35) return "fas fa-user-graduate";
+        if (name.includes("tech") || name.includes("innovation"))
+          return "fas fa-laptop-code";
+        if (name.includes("agriculture") || name.includes("farming"))
+          return "fas fa-tractor";
+        if (name.includes("tourism") || name.includes("hospitality"))
+          return "fas fa-hotel";
+        if (name.includes("health") || name.includes("medical"))
+          return "fas fa-heartbeat";
+        if (name.includes("energy") || name.includes("green"))
+          return "fas fa-bolt";
+        if (name.includes("manufacturing")) return "fas fa-industry";
+
+        return "fas fa-hand-holding-usd";
+      }
+
+      function displayMatchingResults(results) {
+        console.log("📊 Displaying matching results...");
+        aiMatchingHeader.style.display = "block";
+
+        matchingStats.innerHTML = `
+          <div class="stat-item">
+            <div class="stat-value">${results.totalOpportunities}</div>
+            <div class="stat-label">Total Opportunities</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${results.matchedCount}</div>
+            <div class="stat-label">Matches Found</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${Math.round(
+              results.averageMatchScore
+            )}%</div>
+            <div class="stat-label">Avg Match Score</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${Math.round(
+              (results.matchedCount / results.totalOpportunities) * 100
+            )}%</div>
+            <div class="stat-label">Match Rate</div>
+          </div>
+        `;
+      }
+
+      function displayOpportunities(opportunities) {
+        console.log("🎯 Displaying opportunities:", opportunities.length);
+
+        if (opportunities.length === 0) {
+          console.log("❌ No opportunities to display");
+          opportunitiesContainer.innerHTML = `
+            <div class="no-results">
+              <h3>No matching opportunities found</h3>
+              <p>We couldn't find funding opportunities that match your criteria. Try updating your business profile or check back later.</p>
+              <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <a href="smme-profile.html" class="btn btn-primary">
+                  <i class="fas fa-edit"></i> Update Criteria
+                </a>
+                <a href="smme-dashboard.html" class="btn btn-secondary">
+                  <i class="fas fa-home"></i> Back to Dashboard
+                </a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        opportunitiesContainer.innerHTML = opportunities
+          .map((opp) => {
+            const matchLevel = getMatchLevel(opp.matchScore);
+            const fundingBadge = getFundingTypeBadge(opp);
+            const fundingIcon = getFundingTypeIcon(opp);
+
+            return `
+              <div class="opportunity-card ${matchLevel.level}-match">
+                ${
+                  fundingBadge
+                    ? `
+                  <div class="opportunity-badge ${fundingBadge.class}">
+                    ${fundingBadge.label}
+                  </div>
+                `
+                    : ""
+                }
+                
+                <div class="opportunity-header">
+                  <div class="opportunity-title">
+                    <h3><i class="${fundingIcon}"></i> ${opp.name}</h3>
+                    <p>${opp.description || "No description available"}</p>
+                    <div class="funding-type-indicator">
+                      <i class="fas fa-tag"></i>
+                      ${getFundingTypeDescription(opp)}
+                    </div>
+                  </div>
+                  <div class="match-badge ${matchLevel.level}">
+                    ${opp.matchScore}% Match
+                  </div>
+                </div>
+
+                <div class="opportunity-details">
+                  ${
+                    opp.criteria?.funding_amount_min
+                      ? `
+                    <div class="detail-item">
+                      <strong>Funding Range</strong>
+                      <span>R${opp.criteria.funding_amount_min.toLocaleString()} - R${
+                          opp.criteria.funding_amount_max
+                            ? opp.criteria.funding_amount_max.toLocaleString()
+                            : "Open"
+                        }</span>
+                    </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    opp.criteria?.sector
+                      ? `
+                    <div class="detail-item">
+                      <strong>Sector Focus</strong>
+                      <span>${
+                        opp.criteria.sector.charAt(0).toUpperCase() +
+                        opp.criteria.sector.slice(1)
+                      }</span>
+                    </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    opp.criteria?.region
+                      ? `
+                    <div class="detail-item">
+                      <strong>Region Focus</strong>
+                      <span>${
+                        opp.criteria.region.charAt(0).toUpperCase() +
+                        opp.criteria.region.slice(1)
+                      }</span>
+                    </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    opp.criteria?.business_stage
+                      ? `
+                    <div class="detail-item">
+                      <strong>Business Stage</strong>
+                      <span>${
+                        opp.criteria.business_stage.charAt(0).toUpperCase() +
+                        opp.criteria.business_stage.slice(1)
+                      }</span>
+                    </div>
+                  `
+                      : ""
+                  }
+                </div>
+
+                ${
+                  opp.criteria?.tags
+                    ? `
+                  <div class="criteria-tags">
+                    ${opp.criteria.tags
+                      .map((tag) => `<span class="criteria-tag">#${tag}</span>`)
+                      .join("")}
+                  </div>
+                `
+                    : ""
+                }
+
+                <div class="match-analysis">
+                  <h4><i class="fas fa-brain"></i> Match Analysis</h4>
+                  <div class="match-reasons">${opp.matchReasoning}</div>
+                </div>
+
+                <div class="ai-suggestions">
+                  <h4><i class="fas fa-lightbulb"></i> Application Tips</h4>
+                  <ul>
+                    ${opp.aiSuggestions
+                      .map(
+                        (suggestion) =>
+                          `<li><i class="fas fa-check"></i> ${suggestion}</li>`
+                      )
+                      .join("")}
+                  </ul>
+                </div>
+
+                <div class="opportunity-actions">
+                  <button class="btn btn-secondary" onclick="viewDetails('${
+                    opp.id
+                  }')">
+                    <i class="fas fa-info-circle"></i> View Details
+                  </button>
+                  <button class="btn btn-primary" onclick="applyForFunding('${
+                    opp.id
+                  }')">
+                    <i class="fas fa-paper-plane"></i> Apply Now
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function getFundingTypeDescription(opportunity) {
+        const criteria = opportunity.criteria || {};
+
+        if (criteria.owner_gender === "female")
+          return "Women Entrepreneurship Support";
+        if (criteria.owner_age_max === 35) return "Youth Development Program";
+        if (criteria.region && criteria.region !== "national")
+          return `${
+            criteria.region.charAt(0).toUpperCase() + criteria.region.slice(1)
+          } Regional Fund`;
+        if (criteria.sector && criteria.sector !== "any")
+          return `${
+            criteria.sector.charAt(0).toUpperCase() + criteria.sector.slice(1)
+          } Sector Focus`;
+
+        return "General Business Funding";
+      }
+
+      function getMatchLevel(score) {
+        if (score >= 75) return { level: "high", label: "Perfect Match" };
+        if (score >= 50) return { level: "medium", label: "Strong Match" };
+        return { level: "low", label: "Good Match" };
+      }
+
+      function viewDetails(opportunityId) {
+        console.log("🔍 Viewing details for:", opportunityId);
+        const opportunity = allFundingOpportunities.find(
+          (opp) => opp.id === opportunityId
+        );
+        if (opportunity) {
+          const criteria = opportunity.criteria || {};
+          const details = `
+Funding Opportunity: ${opportunity.name}
+Description: ${opportunity.description}
+
+Criteria:
+- Funding Range: ${criteria.amount_range || "Not specified"}
+- Sector: ${criteria.sector || "Any"}
+- Region: ${criteria.region || "National"}
+- Business Stage: ${criteria.business_stage || "Any"}
+
+Requirements: ${criteria.requirements || "None specified"}
+          `;
+          alert(details);
+        }
+      }
+
+      // Initialize file upload with drag and drop
+      function initializeFileUpload() {
+        // Drag and drop event handlers
+        fileUploadArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          fileUploadArea.classList.add("dragover");
+        });
+
+        fileUploadArea.addEventListener("dragleave", (e) => {
+          e.preventDefault();
+          fileUploadArea.classList.remove("dragover");
+        });
+
+        fileUploadArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          fileUploadArea.classList.remove("dragover");
+          const files = e.dataTransfer.files;
+          handleFiles(files);
+        });
+      }
+
+      // Handle file selection from input
+      function handleFileSelect(event) {
+        const files = event.target.files;
+        handleFiles(files);
+      }
+
+      // Process selected files
+      function handleFiles(files) {
+        const maxFiles = 5;
+        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+
+        // Check file count
+        if (uploadedFiles.length + files.length > maxFiles) {
+          alert(`You can only upload up to ${maxFiles} files.`);
+          return;
+        }
+
+        for (let file of files) {
+          // Check if file is PDF
+          if (file.type !== "application/pdf") {
+            alert(
+              `"${file.name}" is not a PDF file. Please upload PDF files only.`
+            );
+            continue;
+          }
+
+          // Check file size
+          if (file.size > maxSize) {
+            alert(`"${file.name}" is too large. Maximum file size is 10MB.`);
+            continue;
+          }
+
+          // Add file to uploaded files
+          uploadedFiles.push(file);
+          addFileToList(file);
+        }
+
+        // Reset file input
+        fileInput.value = "";
+      }
+
+      // Add file to the file list display
+      function addFileToList(file) {
+        const fileItem = document.createElement("div");
+        fileItem.className = "file-item";
+
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+
+        fileItem.innerHTML = `
+          <div class="file-info">
+            <i class="fas fa-file-pdf file-icon"></i>
+            <div>
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${fileSize}</div>
+            </div>
+          </div>
+          <button type="button" class="file-remove" onclick="removeFile('${file.name}')">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+
+        fileList.appendChild(fileItem);
+      }
+
+      // Remove file from uploaded files
+      function removeFile(fileName) {
+        uploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
+
+        // Rebuild file list
+        fileList.innerHTML = "";
+        uploadedFiles.forEach((file) => addFileToList(file));
+      }
+
+      // Generate project summary using AI
+      async function generateProjectSummary(opportunity) {
+        projectSummaryText.innerHTML = `
+          <div class="loading">
+            <div class="spinner" style="width: 20px; height: 20px;"></div>
+            <p>AI is generating your project summary...</p>
+          </div>
+        `;
+
+        try {
+          const prompt = `
+Create a concise 150-200 word project summary for a funding application with these details:
+
+BUSINESS: ${currentProfile.business_name} - ${
+            currentProfile.business_sector
+          } in ${currentProfile.region}
+EXPERIENCE: ${currentProfile.years_in_operation} years in business, ${
+            currentProfile.number_of_employees || "several"
+          } employees
+PROJECT: ${currentProfile.project_description}
+FUNDING USE: ${currentProfile.fund_usage}
+OPPORTUNITY: ${opportunity.name} - ${opportunity.description}
+
+Write a professional project summary that:
+1. Clearly states the project objectives
+2. Highlights the expected outcomes and impact
+3. Shows alignment with the funding opportunity
+4. Demonstrates business capability
+5. Is concise and compelling
+
+Focus on clarity, impact, and alignment with the funding criteria.
+          `;
+
+          // Simulate API call (replace with actual Gemini API when working)
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // Fallback template
+          const summary = `
+Project: Strategic Expansion Initiative for ${currentProfile.business_name}
+
+Objective: ${currentProfile.project_description}
+
+This project represents a strategic growth opportunity for ${currentProfile.business_name}, leveraging our ${currentProfile.years_in_operation} years of experience in the ${currentProfile.business_sector} sector. Based in ${currentProfile.region}, we have established a strong market presence and are now positioned for significant expansion.
+
+The funding will be utilized for ${currentProfile.fund_usage}, enabling us to scale operations, enhance service delivery, and create sustainable impact in our community. This initiative aligns perfectly with the ${opportunity.name} objectives, focusing on innovation, job creation, and economic development.
+
+Expected outcomes include increased operational capacity, market expansion, and enhanced service quality. With our proven track record and experienced team, we are confident in delivering measurable results that will benefit both our business and the broader community.
+
+This project represents a strategic investment in sustainable growth and regional economic development.
+          `.trim();
+
+          projectSummaryText.textContent = summary;
+        } catch (error) {
+          console.error("Error generating project summary:", error);
+          const fallbackSummary = `
+Project Summary: ${currentProfile.project_description}
+
+${currentProfile.business_name} seeks funding to execute a strategic initiative focused on ${currentProfile.project_description}. With ${currentProfile.years_in_operation} years of experience in the ${currentProfile.business_sector} sector, we are well-positioned to successfully implement this project.
+
+The funding will support ${currentProfile.fund_usage}, driving growth and creating positive impact in the ${currentProfile.region} region. This project aligns with our long-term strategic goals and represents a significant opportunity for business expansion and community development.
+
+Our experienced team and proven business model ensure effective implementation and sustainable outcomes.
+          `.trim();
+
+          projectSummaryText.textContent = fallbackSummary;
+        }
+      }
+
+      // Generate motivation letter using AI
+      async function generateMotivationLetter(opportunity) {
+        motivationText.innerHTML = `
+          <div class="loading">
+            <div class="spinner" style="width: 20px; height: 20px;"></div>
+            <p>AI is generating your motivation letter...</p>
+          </div>
+        `;
+
+        try {
+          const prompt = `
+Create a professional funding application motivation letter with these details:
+
+BUSINESS: ${currentProfile.business_name} - ${
+            currentProfile.business_sector
+          } in ${currentProfile.region}
+EXPERIENCE: ${currentProfile.years_in_operation} years, ${
+            currentProfile.number_of_employees || "team of"
+          } employees
+PROJECT: ${currentProfile.project_description}
+FUNDING USE: ${currentProfile.fund_usage}
+OPPORTUNITY: ${opportunity.name}
+
+Write a compelling 250-300 word motivation letter that:
+1. Introduces the business professionally
+2. Explains alignment with the funding opportunity
+3. Highlights qualifications and experience
+4. Describes project impact and benefits
+5. Shows commitment and capability
+
+Use professional tone and focus on creating sustainable impact.
+          `;
+
+          // Simulate API call (replace with actual Gemini API when working)
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // Fallback template
+          const letter = `
+Dear Funding Committee,
+
+I am writing to express our strong interest in the ${
+            opportunity.name
+          } on behalf of ${currentProfile.business_name}. As a established ${
+            currentProfile.business_sector
+          } business operating in ${currentProfile.region} for ${
+            currentProfile.years_in_operation
+          } years, we have developed the expertise and track record necessary for successful project implementation.
+
+Our proposed initiative focuses on ${
+            currentProfile.project_description
+          }, which aligns perfectly with your funding objectives. This project represents a strategic opportunity for growth and impact, leveraging our ${
+            currentProfile.years_in_operation
+          } years of industry experience and market knowledge.
+
+The requested funding will be allocated to ${
+            currentProfile.fund_usage
+          }, enabling us to scale operations, enhance service delivery, and create meaningful employment opportunities. We are committed to transparency, accountability, and sustainable business practices.
+
+Our team's dedication and proven business model position us for successful project execution. We have carefully planned this initiative to ensure maximum impact and sustainable outcomes that benefit both our business and the broader community.
+
+We are excited about the potential partnership and confident that our project aligns with your funding criteria. Thank you for considering our application.
+
+Sincerely,
+${currentProfile.owner_name || "Management Team"}
+${currentProfile.business_name}
+          `.trim();
+
+          motivationText.textContent = letter;
+        } catch (error) {
+          console.error("Error generating motivation letter:", error);
+          const fallbackLetter = `
+Dear Selection Committee,
+
+${currentProfile.business_name} is pleased to apply for the ${opportunity.name} funding opportunity. Our ${currentProfile.years_in_operation} years in the ${currentProfile.business_sector} sector have prepared us for this strategic expansion.
+
+Our project, "${currentProfile.project_description}", will utilize funding for ${currentProfile.fund_usage}. We are confident in our ability to deliver exceptional results and create positive impact.
+
+Thank you for your consideration.
+
+Sincerely,
+${currentProfile.business_name}
+          `.trim();
+
+          motivationText.textContent = fallbackLetter;
+        }
+      }
+
+      // Regenerate functions
+      async function regenerateProjectSummary() {
+        if (currentFundingOpportunity) {
+          await generateProjectSummary(currentFundingOpportunity);
+        }
+      }
+
+      async function regenerateMotivation() {
+        if (currentFundingOpportunity) {
+          await generateMotivationLetter(currentFundingOpportunity);
+        }
+      }
+
+      // Apply for funding function
+      async function applyForFunding(opportunityId) {
+        console.log("📝 Applying for funding:", opportunityId);
+
+        const opportunity = allFundingOpportunities.find(
+          (opp) => opp.id === opportunityId
+        );
+        if (!opportunity) {
+          alert("Funding opportunity not found");
+          return;
+        }
+
+        currentFundingOpportunity = opportunity;
+
+        // Load funder information
+        const { data: funder } = await supabase
+          .from("users")
+          .select("email")
+          .eq("id", opportunity.funder_id)
+          .single();
+
+        // Update modal content
+        modalTitle.textContent = `Apply for: ${opportunity.name}`;
+        applicationInfo.innerHTML = `
+          <h3>${opportunity.name}</h3>
+          <p><strong>Funder:</strong> ${funder?.email || "Unknown"}</p>
+          <p><strong>Description:</strong> ${
+            opportunity.description || "No description available"
+          }</p>
+          ${
+            opportunity.criteria?.amount_range
+              ? `<p><strong>Funding Range:</strong> ${opportunity.criteria.amount_range}</p>`
+              : ""
+          }
+        `;
+
+        // Reset form and files
+        applicationForm.reset();
+        uploadedFiles = [];
+        fileList.innerHTML = "";
+
+        // Generate AI content
+        await generateProjectSummary(opportunity);
+        await generateMotivationLetter(opportunity);
+
+        // Show modal
+        applicationModal.classList.add("active");
+      }
+
+      function closeApplicationModal() {
+        applicationModal.classList.remove("active");
+        currentFundingOpportunity = null;
+        uploadedFiles = [];
+        fileList.innerHTML = "";
+      }
+
+      // Handle form submission
+      applicationForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!currentFundingOpportunity) {
+          alert("No funding opportunity selected");
+          return;
+        }
+
+        const formData = new FormData(applicationForm);
+        const applicationData = {
+          requestedAmount: formData.get("requestedAmount"),
+          projectSummary: projectSummaryText.textContent,
+          motivationLetter: motivationText.textContent,
+          termsAccepted: formData.get("termsAccepted") === "on",
+          uploadedFiles: uploadedFiles.map((file) => ({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          })),
+        };
+
+        // Validate form
+        if (
+          !applicationData.requestedAmount ||
+          !applicationData.termsAccepted
+        ) {
+          alert(
+            "Please fill in all required fields and accept the terms and conditions"
+          );
+          return;
+        }
+
+        try {
+          // Create application record
+          const applicationRecord = {
+            smme_id: currentUser.id,
+            funder_id: currentFundingOpportunity.funder_id,
+            funding_id: currentFundingOpportunity.id,
+            form_data: {
+              requestedAmount: applicationData.requestedAmount,
+              projectSummary: applicationData.projectSummary,
+              motivationLetter: applicationData.motivationLetter,
+              uploadedDocuments: applicationData.uploadedFiles,
+              businessName: currentProfile.business_name,
+              businessSector: currentProfile.business_sector,
+              region: currentProfile.region,
+              submittedAt: new Date().toISOString(),
+            },
+            status: "Submitted",
+          };
+
+          const { data, error } = await supabase
+            .from("applications")
+            .insert([applicationRecord])
+            .select();
+
+          if (error) throw error;
+
+          alert(
+            "🎉 Application submitted successfully!\n\nYour application has been sent to the funder for review. You can track its progress in the 'My Applications' section."
+          );
+
+          // Close modal and redirect to applications page
+          closeApplicationModal();
+          setTimeout(() => {
+            window.location.href = "smme-applications.html";
+          }, 2000);
+        } catch (error) {
+          console.error("Error submitting application:", error);
+          alert("Error submitting application. Please try again.");
+        }
+      });
+
+      function logout() {
+        console.log("🚪 Logging out...");
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "login.html";
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        if (event.target === applicationModal) {
+          closeApplicationModal();
+        }
+      };
+    </script>
+  </body>
+</html>

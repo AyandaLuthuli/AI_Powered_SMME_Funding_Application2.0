@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2d2dff, #667eea);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .dashboard-header h1 {
+        color: #2d2dff;
+        font-size: 2.5rem;
+      }
+
+      .last-updated {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        border-left: 4px solid #2d2dff;
+      }
+
+      .stat-card h3 {
+        font-size: 2rem;
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-card p {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .stat-card.trend-up {
+        border-left-color: #10b981;
+      }
+
+      .stat-card.trend-down {
+        border-left-color: #ef4444;
+      }
+
+      /* Charts Grid */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .chart-container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .chart-container h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+        font-size: 1.3rem;
+      }
+
+      /* Quick Actions */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .action-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .action-card:hover {
+        transform: translateY(-5px);
+        border-color: #2d2dff;
+      }
+
+      .action-card i {
+        font-size: 2.5rem;
+        color: #2d2dff;
+        margin-bottom: 1rem;
+      }
+
+      .action-card h3 {
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .action-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #333;
+        border: 2px solid #e0e0e0;
+      }
+
+      .btn-secondary:hover {
+        background: #e9ecef;
+      }
+
+      /* Recent Activity */
+      .recent-activity {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .recent-activity h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+
+      .activity-list {
+        list-style: none;
+      }
+
+      .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e7ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2d2dff;
+      }
+
+      .activity-content {
+        flex: 1;
+      }
+
+      .activity-content strong {
+        color: #333;
+      }
+
+      .activity-time {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2d2dff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .access-denied {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin: 2rem auto;
+        max-width: 600px;
+      }
+
+      .access-denied h2 {
+        color: #ef4444;
+        margin-bottom: 1rem;
+      }
+
+      .access-denied p {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder Admin
+      </div>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="active">Dashboard</a>
+        <a href="admin-users.html">User Management</a>
+        <a href="admin-reports.html">Reports & Analytics</a>
+        <a href="admin-funding.html">Funding Management</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Admin</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div id="accessDenied" class="access-denied" style="display: none">
+        <h2>Access Denied</h2>
+        <p>You need administrator privileges to access this page.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center">
+          <a href="index.html" class="btn btn-primary">Go to Main Site</a>
+          <a href="login.html" class="btn btn-secondary">Login as Admin</a>
+        </div>
+      </div>
+
+      <div id="adminContent">
+        <div class="dashboard-header">
+          <h1>Admin Dashboard</h1>
+          <div class="last-updated" id="lastUpdated">Loading...</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading dashboard data...</p>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>User Registrations</h3>
+            <canvas id="registrationsChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>User Roles Distribution</h3>
+            <canvas id="rolesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <div class="action-card">
+            <i class="fas fa-users-cog"></i>
+            <h3>User Management</h3>
+            <p>
+              Approve or decline user access, manage user accounts, and view
+              user demographics
+            </p>
+            <a href="admin-users.html" class="btn btn-primary">
+              <i class="fas fa-cog"></i> Manage Users
+            </a>
+          </div>
+
+          <div class="action-card">
+            <i class="fas fa-chart-bar"></i>
+            <h3>Reports & Analytics</h3>
+            <p>
+              Generate professional reports on matches, applications, and system
+              usage statistics
+            </p>
+            <a href="admin-reports.html" class="btn btn-primary">
+              <i class="fas fa-download"></i> View Reports
+            </a>
+          </div>
+
+          <div class="action-card">
+            <i class="fas fa-hand-holding-usd"></i>
+            <h3>Funding Management</h3>
+            <p>
+              Manage funding opportunities, track applications, and monitor
+              funding performance
+            </p>
+            <a href="admin-funding.html" class="btn btn-primary">
+              <i class="fas fa-edit"></i> Manage Funding
+            </a>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+          <h3>Recent System Activity</h3>
+          <div class="activity-list" id="activityList">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading recent activity...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      // Check admin authentication using main user session
+      document.addEventListener("DOMContentLoaded", async () => {
+        await checkAdminAuth();
+      });
+
+      async function checkAdminAuth() {
+        const userData = localStorage.getItem("fundfinder_user");
+
+        if (!userData) {
+          showAccessDenied();
+          return;
+        }
+
+        const user = JSON.parse(userData);
+
+        // Check if user is ADMIN and active
+        const { data: userRecord, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (
+          error ||
+          !userRecord ||
+          userRecord.role !== "ADMIN" ||
+          !userRecord.active
+        ) {
+          showAccessDenied();
+          return;
+        }
+
+        // User is valid admin, show admin content
+        document.getElementById("userName").textContent = user.email;
+        document.getElementById("user-avatar").textContent = user.email
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("adminContent").style.display = "block";
+
+        await loadDashboardData();
+      }
+
+      function showAccessDenied() {
+        document.getElementById("accessDenied").style.display = "block";
+        document.getElementById("adminContent").style.display = "none";
+      }
+
+      async function loadDashboardData() {
+        try {
+          // Load user statistics
+          const { data: users, error: usersError } = await supabase
+            .from("users")
+            .select("*");
+
+          if (usersError) throw usersError;
+
+          // Load SMME profiles
+          const { data: smmes, error: smmesError } = await supabase
+            .from("smmes")
+            .select("*");
+
+          // Load funding data
+          const { data: funding, error: fundingError } = await supabase
+            .from("funding")
+            .select("*");
+
+          // Calculate statistics
+          const totalUsers = users.length;
+          const activeUsers = users.filter((u) => u.active).length;
+          const pendingUsers = users.filter((u) => !u.active).length;
+          const smmeCount = users.filter((u) => u.role === "SMME").length;
+          const funderCount = users.filter((u) => u.role === "FUNDER").length;
+          const adminCount = users.filter((u) => u.role === "ADMIN").length;
+
+          // Update stats grid
+          document.getElementById("statsGrid").innerHTML = `
+            <div class="stat-card trend-up">
+              <h3>${totalUsers}</h3>
+              <p>Total Users</p>
+            </div>
+            <div class="stat-card trend-up">
+              <h3>${activeUsers}</h3>
+              <p>Active Users</p>
+            </div>
+            <div class="stat-card trend-down">
+              <h3>${pendingUsers}</h3>
+              <p>Pending Approval</p>
+            </div>
+            <div class="stat-card">
+              <h3>${smmeCount}</h3>
+              <p>SMME Accounts</p>
+            </div>
+            <div class="stat-card">
+              <h3>${funderCount}</h3>
+              <p>Funder Accounts</p>
+            </div>
+            <div class="stat-card">
+              <h3>${funding?.length || 0}</h3>
+              <p>Funding Opportunities</p>
+            </div>
+          `;
+
+          // Update last updated time
+          document.getElementById(
+            "lastUpdated"
+          ).textContent = `Last updated: ${new Date().toLocaleString()}`;
+
+          // Create charts
+          createCharts(users);
+          loadRecentActivity(users);
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          document.getElementById("statsGrid").innerHTML = `
+            <div class="stat-card">
+              <h3>Error</h3>
+              <p>Failed to load data</p>
+            </div>
+          `;
+        }
+      }
+
+      function createCharts(users) {
+        // User Registrations Chart
+        const registrationsCtx = document
+          .getElementById("registrationsChart")
+          .getContext("2d");
+
+        // Group users by creation date (last 7 days)
+        const last7Days = [...Array(7)]
+          .map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toISOString().split("T")[0];
+          })
+          .reverse();
+
+        const registrationsData = last7Days.map((date) => {
+          return users.filter(
+            (user) => user.created_at && user.created_at.split("T")[0] === date
+          ).length;
+        });
+
+        new Chart(registrationsCtx, {
+          type: "line",
+          data: {
+            labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+            datasets: [
+              {
+                label: "New Registrations",
+                data: registrationsData,
+                borderColor: "#2d2dff",
+                backgroundColor: "rgba(45, 45, 255, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+
+        // Roles Distribution Chart
+        const rolesCtx = document.getElementById("rolesChart").getContext("2d");
+        const roleCounts = {
+          SMME: users.filter((u) => u.role === "SMME").length,
+          FUNDER: users.filter((u) => u.role === "FUNDER").length,
+          ADMIN: users.filter((u) => u.role === "ADMIN").length,
+        };
+
+        new Chart(rolesCtx, {
+          type: "doughnut",
+          data: {
+            labels: Object.keys(roleCounts),
+            datasets: [
+              {
+                data: Object.values(roleCounts),
+                backgroundColor: ["#2d2dff", "#10b981", "#8b5cf6"],
+                borderWidth: 2,
+                borderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
+
+      function loadRecentActivity(users) {
+        // Get recent users (last 5)
+        const recentUsers = users
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5);
+
+        const activityList = document.getElementById("activityList");
+        activityList.innerHTML = recentUsers
+          .map(
+            (user) => `
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="activity-content">
+              <strong>${user.email}</strong> registered as ${user.role}
+              <div class="activity-time">
+                ${new Date(user.created_at).toLocaleString()}
+                ${
+                  !user.active
+                    ? ' • <span style="color: #f59e0b;">Pending Approval</span>'
+                    : ' • <span style="color: #10b981;">Active</span>'
+                }
+              </div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+
+        if (recentUsers.length === 0) {
+          activityList.innerHTML =
+            '<div class="activity-item">No recent activity</div>';
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

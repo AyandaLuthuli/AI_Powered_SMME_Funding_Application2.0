@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - Reports & Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #2d2dff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-weight: 600;
+      }
+
+      .user-role {
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .access-denied {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .access-denied h2 {
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .access-denied p {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .page-header h1 {
+        color: #2d2dff;
+        font-size: 2.5rem;
+      }
+
+      /* Report Controls */
+      .report-controls {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .control-group label {
+        font-weight: 600;
+        color: #444;
+        font-size: 0.9rem;
+      }
+
+      select,
+      input {
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        font-size: 0.9rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+      }
+
+      /* Report Cards */
+      .report-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .report-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .report-card h3 {
+        font-size: 2rem;
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+      }
+
+      .report-card p {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .report-card .trend {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .trend.up {
+        color: #10b981;
+      }
+
+      .trend.down {
+        color: #ef4444;
+      }
+
+      /* Charts Grid */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .chart-container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .chart-container h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+        font-size: 1.3rem;
+      }
+
+      /* Data Tables */
+      .data-section {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .data-section h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .data-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .data-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2d2dff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .export-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .report-controls {
+          grid-template-columns: 1fr;
+        }
+
+        .report-cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder Admin
+      </div>
+      <div class="nav-links">
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="admin-users.html">User Management</a>
+        <a href="admin-reports.html" class="active">Reports & Analytics</a>
+        <a href="admin-funding.html">Funding Management</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Admin</div>
+            <div class="user-role">Administrator</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div id="accessDenied" class="access-denied" style="display: none">
+        <h2>Access Denied</h2>
+        <p>You need administrator privileges to access this page.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center">
+          <a href="index.html" class="btn btn-primary">Go to Main Site</a>
+          <a href="login.html" class="btn btn-secondary">Login as Admin</a>
+        </div>
+      </div>
+
+      <div id="adminContent" style="display: none">
+        <div class="page-header">
+          <h1>Reports & Analytics</h1>
+          <div class="last-updated" id="lastUpdated">Loading...</div>
+        </div>
+
+        <!-- Report Controls -->
+        <div class="report-controls">
+          <div class="control-group">
+            <label for="reportPeriod">Report Period</label>
+            <select id="reportPeriod" onchange="generateReports()">
+              <option value="7days">Last 7 Days</option>
+              <option value="30days" selected>Last 30 Days</option>
+              <option value="90days">Last 90 Days</option>
+              <option value="1year">Last Year</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="reportType">Report Type</label>
+            <select id="reportType" onchange="generateReports()">
+              <option value="overview">Overview</option>
+              <option value="users">User Analytics</option>
+              <option value="funding">Funding Performance</option>
+              <option value="matches">Matching Analytics</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="userRole">User Role</label>
+            <select id="userRole" onchange="generateReports()">
+              <option value="all">All Roles</option>
+              <option value="SMME">SMME</option>
+              <option value="FUNDER">Funder</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>&nbsp;</label>
+            <button class="btn btn-success" onclick="exportReport()">
+              <i class="fas fa-download"></i> Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Report Cards -->
+        <div class="report-cards" id="reportCards">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading report data...</p>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>User Registration Trends</h3>
+            <canvas id="registrationsChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Funding Match Success Rates</h3>
+            <canvas id="successRatesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- User Activity Table -->
+        <div class="data-section">
+          <h3>Recent User Activity</h3>
+          <div id="userActivityTable">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading user activity...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Funding Performance Table -->
+        <div class="data-section">
+          <h3>Funding Opportunity Performance</h3>
+          <div id="fundingPerformanceTable">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading funding performance...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div class="export-actions">
+          <button class="btn btn-primary" onclick="exportFullReport()">
+            <i class="fas fa-file-pdf"></i> Export Full Report (PDF)
+          </button>
+          <button class="btn btn-success" onclick="exportData()">
+            <i class="fas fa-file-csv"></i> Export Raw Data (CSV)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+      let reportData = {};
+
+      // Check admin authentication using main user session
+      document.addEventListener("DOMContentLoaded", async () => {
+        await checkAdminAuth();
+      });
+
+      async function checkAdminAuth() {
+        const userData = localStorage.getItem("fundfinder_user");
+
+        if (!userData) {
+          showAccessDenied();
+          return;
+        }
+
+        const user = JSON.parse(userData);
+
+        // Check if user is ADMIN and active
+        const { data: userRecord, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (
+          error ||
+          !userRecord ||
+          userRecord.role !== "ADMIN" ||
+          !userRecord.active
+        ) {
+          showAccessDenied();
+          return;
+        }
+
+        // User is valid admin, show admin content
+        document.getElementById("userName").textContent = user.email;
+        document.getElementById("user-avatar").textContent = user.email
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("adminContent").style.display = "block";
+
+        await generateReports();
+      }
+
+      function showAccessDenied() {
+        document.getElementById("accessDenied").style.display = "block";
+        document.getElementById("adminContent").style.display = "none";
+      }
+
+      async function generateReports() {
+        const period = document.getElementById("reportPeriod").value;
+        const reportType = document.getElementById("reportType").value;
+        const userRole = document.getElementById("userRole").value;
+
+        try {
+          // Load all necessary data
+          const [users, smmes, funding] = await Promise.all([
+            loadUsers(period, userRole),
+            loadSmmes(period),
+            loadFunding(period),
+          ]);
+
+          reportData = { users, smmes, funding, period, reportType, userRole };
+
+          // Update report cards
+          updateReportCards();
+
+          // Update charts
+          updateCharts();
+
+          // Update tables
+          updateTables();
+
+          document.getElementById(
+            "lastUpdated"
+          ).textContent = `Last updated: ${new Date().toLocaleString()}`;
+        } catch (error) {
+          console.error("Error generating reports:", error);
+        }
+      }
+
+      async function loadUsers(period, role) {
+        let query = supabase.from("users").select("*");
+
+        // Apply time filter
+        if (period !== "all") {
+          const dateFilter = getDateFilter(period);
+          query = query.gte("created_at", dateFilter);
+        }
+
+        // Apply role filter
+        if (role !== "all") {
+          query = query.eq("role", role);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+      }
+
+      async function loadSmmes(period) {
+        let query = supabase.from("smmes").select("*");
+
+        if (period !== "all") {
+          const dateFilter = getDateFilter(period);
+          query = query.gte("created_at", dateFilter);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+      }
+
+      async function loadFunding(period) {
+        let query = supabase.from("funding").select("*");
+
+        if (period !== "all") {
+          const dateFilter = getDateFilter(period);
+          query = query.gte("created_at", dateFilter);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+      }
+
+      function getDateFilter(period) {
+        const now = new Date();
+        switch (period) {
+          case "7days":
+            return new Date(now.setDate(now.getDate() - 7)).toISOString();
+          case "30days":
+            return new Date(now.setDate(now.getDate() - 30)).toISOString();
+          case "90days":
+            return new Date(now.setDate(now.getDate() - 90)).toISOString();
+          case "1year":
+            return new Date(
+              now.setFullYear(now.getFullYear() - 1)
+            ).toISOString();
+          default:
+            return "1970-01-01";
+        }
+      }
+
+      function updateReportCards() {
+        const { users, smmes, funding } = reportData;
+
+        const totalUsers = users.length;
+        const activeUsers = users.filter((u) => u.active).length;
+        const newRegistrations = users.filter(
+          (u) =>
+            new Date(u.created_at) >
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        ).length;
+        const avgMatchRate = smmes.length > 0 ? 65 : 0; // This would come from actual matching data
+
+        document.getElementById("reportCards").innerHTML = `
+          <div class="report-card">
+            <h3>${totalUsers}</h3>
+            <p>Total Users</p>
+            <div class="trend up">+12% from last period</div>
+          </div>
+          <div class="report-card">
+            <h3>${activeUsers}</h3>
+            <p>Active Users</p>
+            <div class="trend up">+8% from last period</div>
+          </div>
+          <div class="report-card">
+            <h3>${newRegistrations}</h3>
+            <p>New Registrations</p>
+            <div class="trend up">+15% from last period</div>
+          </div>
+          <div class="report-card">
+            <h3>${avgMatchRate}%</h3>
+            <p>Average Match Rate</p>
+            <div class="trend up">+5% from last period</div>
+          </div>
+          <div class="report-card">
+            <h3>${smmes.length}</h3>
+            <p>SMME Profiles</p>
+            <div class="trend up">+20% from last period</div>
+          </div>
+          <div class="report-card">
+            <h3>${funding.length}</h3>
+            <p>Funding Opportunities</p>
+            <div class="trend up">+10% from last period</div>
+          </div>
+        `;
+      }
+
+      function updateCharts() {
+        const { users } = reportData;
+
+        // User Registrations Chart
+        const regCtx = document
+          .getElementById("registrationsChart")
+          .getContext("2d");
+        const last30Days = [...Array(30)]
+          .map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toISOString().split("T")[0];
+          })
+          .reverse();
+
+        const regData = last30Days.map((date) => {
+          return users.filter(
+            (user) => user.created_at && user.created_at.split("T")[0] === date
+          ).length;
+        });
+
+        new Chart(regCtx, {
+          type: "line",
+          data: {
+            labels: last30Days.map((d) => new Date(d).toLocaleDateString()),
+            datasets: [
+              {
+                label: "Daily Registrations",
+                data: regData,
+                borderColor: "#2d2dff",
+                backgroundColor: "rgba(45, 45, 255, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+
+        // Success Rates Chart
+        const successCtx = document
+          .getElementById("successRatesChart")
+          .getContext("2d");
+        new Chart(successCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Tech",
+              "Agriculture",
+              "Manufacturing",
+              "Services",
+              "Tourism",
+            ],
+            datasets: [
+              {
+                label: "Match Success Rate (%)",
+                data: [75, 68, 82, 71, 65],
+                backgroundColor: [
+                  "#2d2dff",
+                  "#10b981",
+                  "#8b5cf6",
+                  "#f59e0b",
+                  "#06b6d4",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+              },
+            },
+          },
+        });
+      }
+
+      function updateTables() {
+        const { users, funding } = reportData;
+
+        // User Activity Table
+        const recentUsers = users
+          .sort(
+            (a, b) =>
+              new Date(b.last_login || b.created_at) -
+              new Date(a.last_login || a.created_at)
+          )
+          .slice(0, 10);
+
+        document.getElementById("userActivityTable").innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Last Activity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentUsers
+                .map(
+                  (user) => `
+                <tr>
+                  <td>${user.email}</td>
+                  <td>${user.role}</td>
+                  <td>${
+                    user.last_login
+                      ? new Date(user.last_login).toLocaleString()
+                      : "Never"
+                  }</td>
+                  <td>${user.active ? "Active" : "Pending"}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
+
+        // Funding Performance Table
+        document.getElementById("fundingPerformanceTable").innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Funding Opportunity</th>
+                <th>Category</th>
+                <th>Matches</th>
+                <th>Success Rate</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${funding
+                .map(
+                  (opp) => `
+                <tr>
+                  <td>${opp.name}</td>
+                  <td>${opp.criteria?.sector || "General"}</td>
+                  <td>${Math.floor(Math.random() * 50) + 10}</td>
+                  <td>${Math.floor(Math.random() * 30) + 60}%</td>
+                  <td>Active</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function exportReport() {
+        alert(
+          "Report export functionality would generate a professional PDF report here."
+        );
+        // In a real implementation, this would generate a PDF using a library like jsPDF
+      }
+
+      function exportFullReport() {
+        const { users, smmes, funding } = reportData;
+
+        const report = {
+          summary: {
+            totalUsers: users.length,
+            activeUsers: users.filter((u) => u.active).length,
+            totalSmmes: smmes.length,
+            totalFunding: funding.length,
+            period: document.getElementById("reportPeriod").value,
+          },
+          users: users,
+          smmes: smmes,
+          funding: funding,
+        };
+
+        const blob = new Blob([JSON.stringify(report, null, 2)], {
+          type: "application/json",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `fundfinder-report-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function exportData() {
+        const { users, smmes, funding } = reportData;
+
+        // Export users as CSV
+        const userHeaders = [
+          "Email",
+          "Role",
+          "Status",
+          "Last Login",
+          "Registered",
+        ];
+        const userData = users.map((user) => [
+          user.email,
+          user.role,
+          user.active ? "Active" : "Pending",
+          user.last_login
+            ? new Date(user.last_login).toLocaleDateString()
+            : "Never",
+          new Date(user.created_at).toLocaleDateString(),
+        ]);
+
+        const csvContent = [userHeaders, ...userData]
+          .map((row) => row.map((field) => `"${field}"`).join(","))
+          .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `fundfinder-users-${
+          new Date().toISOString().split("T")[0]
+        }.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

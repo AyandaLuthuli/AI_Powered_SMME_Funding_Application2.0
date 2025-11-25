@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - SMME Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+        min-height: 100vh;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2d2dff, #667eea);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      /* Welcome Section */
+      .welcome-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 3rem;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .welcome-section h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+      }
+
+      .welcome-section p {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 3rem;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+      }
+
+      .stat-card h3 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .stat-card p {
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+
+      /* Quick Actions */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .action-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .action-card:hover {
+        transform: translateY(-10px);
+        border-color: #2d2dff;
+      }
+
+      .action-card i {
+        font-size: 3rem;
+        color: #2d2dff;
+        margin-bottom: 1.5rem;
+      }
+
+      .action-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .action-card p {
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      .action-btn {
+        background: #2d2dff;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+      }
+
+      .action-btn:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      /* Pricing Section */
+      .pricing-section {
+        background: white;
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, #2d2dff, #667eea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .pricing-card {
+        background: #f8f9fa;
+        padding: 2.5rem;
+        border-radius: 15px;
+        text-align: center;
+        transition: transform 0.3s;
+        border: 3px solid transparent;
+        position: relative;
+      }
+
+      .pricing-card.popular {
+        background: white;
+        border-color: #2d2dff;
+        transform: scale(1.05);
+      }
+
+      .pricing-card.popular::before {
+        content: "MOST POPULAR";
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2d2dff;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .pricing-card:hover {
+        transform: translateY(-10px);
+      }
+
+      .pricing-card.popular:hover {
+        transform: scale(1.05) translateY(-10px);
+      }
+
+      .plan-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .plan-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #2d2dff, #667eea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .plan-price .period {
+        font-size: 1rem;
+        color: #666;
+      }
+
+      .plan-features {
+        list-style: none;
+        margin-bottom: 2rem;
+        text-align: left;
+      }
+
+      .plan-features li {
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #eee;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .plan-features li:last-child {
+        border-bottom: none;
+      }
+
+      .plan-features li i {
+        color: #2d2dff;
+      }
+
+      .pricing-btn {
+        background: #2d2dff;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+      }
+
+      .pricing-btn:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .pricing-btn.secondary {
+        background: transparent;
+        border: 2px solid #2d2dff;
+        color: #2d2dff;
+      }
+
+      .pricing-btn.secondary:hover {
+        background: #2d2dff;
+        color: white;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .welcome-section {
+          padding: 2rem 1rem;
+        }
+
+        .welcome-section h1 {
+          font-size: 2rem;
+        }
+
+        .quick-actions,
+        .pricing-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .pricing-card.popular {
+          transform: none;
+        }
+
+        .pricing-card.popular:hover {
+          transform: translateY(-10px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder
+      </div>
+      <div class="nav-links">
+        <a href="smme-dashboard.html" class="active">Dashboard</a>
+        <a href="smme-profile.html">My Profile</a>
+        <a href="smme-funding-opportunities.html">Find Opportunities</a>
+        <a href="smme-applications.html">My Applications</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">S</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name">SMME User</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Welcome Section -->
+      <section class="welcome-section">
+        <h1>Welcome to Your Funding Journey! 🚀</h1>
+        <p>
+          Unlock your business potential with access to R50+ million in funding
+          opportunities. Connect with investors who believe in your vision.
+        </p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="fas fa-bullseye"></i>
+            <h3>85%</h3>
+            <p>Success Rate</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <h3>500+</h3>
+            <p>Active Investors</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-rocket"></i>
+            <h3>R50M+</h3>
+            <p>Funding Deployed</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-clock"></i>
+            <h3>24h</h3>
+            <p>Average Response</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="action-card">
+          <i class="fas fa-user-edit"></i>
+          <h3>Complete Your Profile</h3>
+          <p>
+            Finish setting up your business profile to unlock personalized
+            funding matches and increase your chances of approval.
+          </p>
+          <button class="action-btn" onclick="goToProfile()">
+            Update Profile
+          </button>
+        </div>
+
+        <div class="action-card">
+          <i class="fas fa-search-dollar"></i>
+          <h3>Find Funding</h3>
+          <p>
+            Discover funding opportunities perfectly matched to your business
+            using our AI-powered matching system.
+          </p>
+          <button class="action-btn" onclick="findFunding()">
+            Explore Opportunities
+          </button>
+        </div>
+
+        <div class="action-card">
+          <i class="fas fa-file-alt"></i>
+          <h3>Track Applications</h3>
+          <p>
+            Monitor your funding applications, check status updates, and manage
+            your submissions in one place.
+          </p>
+          <button class="action-btn" onclick="viewApplications()">
+            View Applications
+          </button>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <section class="pricing-section">
+        <h2 class="section-title">Unlock Premium Features</h2>
+        <div class="pricing-grid">
+          <!-- Freemium Plan -->
+          <div class="pricing-card">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">R0<span class="period">/month</span></div>
+            <ul class="plan-features">
+              <li><i class="fas fa-check"></i> Basic investor matching</li>
+              <li><i class="fas fa-check"></i> 5 funding applications/month</li>
+              <li><i class="fas fa-check"></i> Standard profile listing</li>
+              <li><i class="fas fa-check"></i> Email support</li>
+              <li><i class="fas fa-times"></i> Premium investor access</li>
+              <li><i class="fas fa-times"></i> Advanced analytics</li>
+              <li><i class="fas fa-times"></i> Priority application review</li>
+            </ul>
+            <button class="pricing-btn secondary">Current Plan</button>
+          </div>
+
+          <!-- Premium Plan -->
+          <div class="pricing-card popular">
+            <div class="plan-name">Growth Pro</div>
+            <div class="plan-price">R499<span class="period">/month</span></div>
+            <ul class="plan-features">
+              <li><i class="fas fa-check"></i> Advanced AI matching</li>
+              <li><i class="fas fa-check"></i> Unlimited applications</li>
+              <li><i class="fas fa-check"></i> Premium profile featuring</li>
+              <li><i class="fas fa-check"></i> Priority support 24/7</li>
+              <li><i class="fas fa-check"></i> Exclusive investor network</li>
+              <li><i class="fas fa-check"></i> Detailed analytics dashboard</li>
+              <li><i class="fas fa-check"></i> Personal funding advisor</li>
+            </ul>
+            <button class="pricing-btn" onclick="upgradeToPremium()">
+              Upgrade to Pro
+            </button>
+          </div>
+
+          <!-- Enterprise Plan -->
+          <div class="pricing-card">
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price">Custom</div>
+            <ul class="plan-features">
+              <li><i class="fas fa-check"></i> Everything in Growth Pro</li>
+              <li>
+                <i class="fas fa-check"></i> Custom investor introductions
+              </li>
+              <li><i class="fas fa-check"></i> White-glove onboarding</li>
+              <li><i class="fas fa-check"></i> Dedicated success team</li>
+              <li><i class="fas fa-check"></i> API access</li>
+              <li><i class="fas fa-check"></i> Custom reporting</li>
+              <li><i class="fas fa-check"></i> Strategic advisory</li>
+            </ul>
+            <button class="pricing-btn secondary" onclick="contactSales()">
+              Contact Sales
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Load user data
+      document.addEventListener("DOMContentLoaded", function () {
+        const userData = JSON.parse(localStorage.getItem("fundfinder_user"));
+
+        if (!userData || userData.role !== "SMME") {
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Display user info
+        document.getElementById("user-name").textContent =
+          userData.email.split("@")[0];
+        document.getElementById("user-avatar").textContent = userData.email
+          .charAt(0)
+          .toUpperCase();
+
+        // Animate stats counter
+        animateStats();
+      });
+
+      function animateStats() {
+        const stats = document.querySelectorAll(".stat-card h3");
+        stats.forEach((stat) => {
+          const target = parseInt(stat.textContent);
+          let current = 0;
+          const increment = target / 50;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              current = target;
+              clearInterval(timer);
+            }
+            stat.textContent =
+              Math.floor(current) +
+              (stat.textContent.includes("%") ? "%" : "+");
+          }, 50);
+        });
+      }
+
+      function goToProfile() {
+        window.location.href = "smme-profile.html";
+      }
+
+      function findFunding() {
+        window.location.href = "smme-funding-opportunities.html";
+      }
+
+      function viewApplications() {
+        window.location.href = "smme-applications.html";
+      }
+
+      function upgradeToPremium() {
+        alert(
+          "🚀 Welcome to Growth Pro! Enjoy your 14-day free trial. You will be redirected to our secure payment gateway."
+        );
+        // In a real app, redirect to payment processing
+      }
+
+      function contactSales() {
+        alert(
+          "📞 Our sales team will contact you within 24 hours to discuss enterprise solutions."
+        );
+        // In a real app, open contact form
+      }
+
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

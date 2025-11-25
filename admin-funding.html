@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundFinder - Funding Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+      }
+
+      /* Header */
+      .header {
+        background: #fff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #2d2dff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #2d2dff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-weight: 600;
+      }
+
+      .user-role {
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #ff3742;
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .access-denied {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .access-denied h2 {
+        color: #dc2626;
+        margin-bottom: 1rem;
+      }
+
+      .access-denied p {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .page-header h1 {
+        color: #2d2dff;
+        font-size: 2.5rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: #2d2dff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1a1aff;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .btn-warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .btn-warning:hover {
+        background: #d97706;
+      }
+
+      .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      /* Funding Overview Cards */
+      .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .overview-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .overview-card h3 {
+        font-size: 1.8rem;
+        color: #2d2dff;
+        margin-bottom: 0.5rem;
+      }
+
+      .overview-card p {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .trend {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .trend.up {
+        color: #10b981;
+      }
+
+      .trend.down {
+        color: #ef4444;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        background: #fff;
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab {
+        padding: 1rem 2rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab.active {
+        border-bottom: 3px solid #2d2dff;
+        color: #2d2dff;
+      }
+
+      .tab:hover:not(.active) {
+        background: #f8f9fa;
+      }
+
+      /* Tab Content */
+      .tab-content {
+        display: none;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Filters */
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        color: #444;
+        font-size: 0.9rem;
+      }
+
+      select,
+      input {
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        font-size: 0.9rem;
+      }
+
+      /* Tables */
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .data-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .data-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .status-active {
+        background: #e6f7ee;
+        color: #0a7b3e;
+      }
+
+      .status-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status-closed {
+        background: #fde8e8;
+        color: #c53030;
+      }
+
+      .status-approved {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .status-rejected {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .amount {
+        font-weight: 600;
+        color: #2d2dff;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .modal-header h2 {
+        color: #2d2dff;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #444;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        font-size: 0.9rem;
+      }
+
+      .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+      }
+
+      /* Loading */
+      .loading {
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2d2dff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.5rem;
+        }
+
+        .nav-links a {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .tabs {
+          flex-direction: column;
+        }
+
+        .tab {
+          padding: 1rem;
+          text-align: center;
+        }
+
+        .filters {
+          grid-template-columns: 1fr;
+        }
+
+        .overview-cards {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-hand-holding-usd"></i>
+        FundFinder Admin
+      </div>
+      <div class="nav-links">
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="admin-users.html">User Management</a>
+        <a href="admin-reports.html">Reports & Analytics</a>
+        <a href="admin-funding.html" class="active">Funding Management</a>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Admin</div>
+            <div class="user-role">Administrator</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div id="accessDenied" class="access-denied" style="display: none">
+        <h2>Access Denied</h2>
+        <p>You need administrator privileges to access this page.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center">
+          <a href="index.html" class="btn btn-primary">Go to Main Site</a>
+          <a href="login.html" class="btn btn-secondary">Login as Admin</a>
+        </div>
+      </div>
+
+      <div id="adminContent" style="display: none">
+        <div class="page-header">
+          <h1>Funding Management</h1>
+          <button class="btn btn-primary" onclick="openAddFundingModal()">
+            <i class="fas fa-plus"></i> Add Funding Opportunity
+          </button>
+        </div>
+
+        <!-- Overview Cards -->
+        <div class="overview-cards">
+          <div class="overview-card">
+            <h3 id="totalFunding">0</h3>
+            <p>Total Funding Opportunities</p>
+            <div class="trend up">+5% from last month</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="activeFunding">0</h3>
+            <p>Active Opportunities</p>
+            <div class="trend up">+12% from last month</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="totalApplications">0</h3>
+            <p>Total Applications</p>
+            <div class="trend up">+8% from last month</div>
+          </div>
+          <div class="overview-card">
+            <h3 id="successRate">65%</h3>
+            <p>Match Success Rate</p>
+            <div class="trend up">+3% from last month</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('opportunities')">
+            Funding Opportunities
+          </div>
+          <div class="tab" onclick="switchTab('applications')">
+            Applications
+          </div>
+          <div class="tab" onclick="switchTab('performance')">Performance</div>
+        </div>
+
+        <!-- Funding Opportunities Tab -->
+        <div id="opportunitiesTab" class="tab-content active">
+          <div class="filters">
+            <div class="filter-group">
+              <label for="statusFilter">Status</label>
+              <select id="statusFilter" onchange="filterFunding()">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="sectorFilter">Sector</label>
+              <select id="sectorFilter" onchange="filterFunding()">
+                <option value="all">All Sectors</option>
+                <option value="technology">Technology</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="services">Services</option>
+                <option value="tourism">Tourism</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="searchFunding">Search</label>
+              <input
+                type="text"
+                id="searchFunding"
+                placeholder="Search by name..."
+                oninput="filterFunding()"
+              />
+            </div>
+            <div style="flex: 1"></div>
+            <div class="filter-group">
+              <label>&nbsp;</label>
+              <button class="btn btn-success" onclick="exportFundingData()">
+                <i class="fas fa-download"></i> Export Data
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div id="fundingTable">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading funding opportunities...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Applications Tab -->
+        <div id="applicationsTab" class="tab-content">
+          <div class="filters">
+            <div class="filter-group">
+              <label for="appStatusFilter">Status</label>
+              <select id="appStatusFilter" onchange="filterApplications()">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="fundingAppFilter">Funding Opportunity</label>
+              <select id="fundingAppFilter" onchange="filterApplications()">
+                <option value="all">All Opportunities</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="searchApplications">Search</label>
+              <input
+                type="text"
+                id="searchApplications"
+                placeholder="Search by SMME..."
+                oninput="filterApplications()"
+              />
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div id="applicationsTable">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading applications...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Tab -->
+        <div id="performanceTab" class="tab-content">
+          <div class="filters">
+            <div class="filter-group">
+              <label for="periodFilter">Period</label>
+              <select id="periodFilter" onchange="updatePerformanceMetrics()">
+                <option value="7days">Last 7 Days</option>
+                <option value="30days" selected>Last 30 Days</option>
+                <option value="90days">Last 90 Days</option>
+                <option value="1year">Last Year</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div id="performanceTable">
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading performance data...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Funding Modal -->
+    <div id="addFundingModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add Funding Opportunity</h2>
+          <button class="close-modal" onclick="closeAddFundingModal()">
+            &times;
+          </button>
+        </div>
+        <form id="addFundingForm">
+          <div class="form-group">
+            <label for="fundingName">Funding Name</label>
+            <input type="text" id="fundingName" required />
+          </div>
+          <div class="form-group">
+            <label for="fundingAmount">Funding Amount (ZAR)</label>
+            <input type="number" id="fundingAmount" required />
+          </div>
+          <div class="form-group">
+            <label for="fundingSector">Sector</label>
+            <select id="fundingSector" required>
+              <option value="">Select Sector</option>
+              <option value="technology">Technology</option>
+              <option value="agriculture">Agriculture</option>
+              <option value="manufacturing">Manufacturing</option>
+              <option value="services">Services</option>
+              <option value="tourism">Tourism</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fundingDescription">Description</label>
+            <textarea id="fundingDescription" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fundingCriteria">Eligibility Criteria</label>
+            <textarea id="fundingCriteria" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fundingDeadline">Application Deadline</label>
+            <input type="date" id="fundingDeadline" required />
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeAddFundingModal()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Create Funding Opportunity
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      let allFunding = [];
+      let allApplications = [];
+
+      // Check admin authentication
+      document.addEventListener("DOMContentLoaded", async () => {
+        await checkAdminAuth();
+      });
+
+      async function checkAdminAuth() {
+        const userData = localStorage.getItem("fundfinder_user");
+
+        if (!userData) return showAccessDenied();
+
+        const user = JSON.parse(userData);
+
+        const { data: userRecord, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (
+          error ||
+          !userRecord ||
+          userRecord.role !== "ADMIN" ||
+          !userRecord.active
+        ) {
+          return showAccessDenied();
+        }
+
+        document.getElementById("userName").textContent = user.email;
+        document.getElementById("user-avatar").textContent = user.email
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("adminContent").style.display = "block";
+
+        await loadFundingData();
+        await loadApplications();
+      }
+
+      function showAccessDenied() {
+        document.getElementById("accessDenied").style.display = "block";
+        document.getElementById("adminContent").style.display = "none";
+      }
+
+      // Load funding opportunities from Supabase
+      async function loadFundingData() {
+        try {
+          const { data: funding, error } = await supabase
+            .from("funding")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          if (error) throw error;
+
+          allFunding = funding || [];
+          displayFunding(allFunding);
+          updateOverviewCards();
+          populateFundingFilter();
+        } catch (error) {
+          console.error("Error loading funding data:", error);
+          document.getElementById(
+            "fundingTable"
+          ).innerHTML = `<div class="no-data"><p>Error loading funding opportunities. Please try again.</p></div>`;
+        }
+      }
+
+      // Load applications from Supabase
+      async function loadApplications() {
+        try {
+          const { data: applications, error } = await supabase
+            .from("applications")
+            .select(
+              `
+        id,
+        smme_id,
+        funder_id,
+        funding_id,
+        form_data,
+        status,
+        submitted_at
+      `
+            )
+            .order("submitted_at", { ascending: false });
+
+          if (error) throw error;
+
+          // Map SMME name and funding name for display
+          allApplications = await Promise.all(
+            applications.map(async (app) => {
+              // Get SMME name
+              const { data: smme, error: smmeError } = await supabase
+                .from("users")
+                .select("name")
+                .eq("id", app.smme_id)
+                .single();
+              if (smmeError) console.error(smmeError);
+
+              // Get funding name
+              const { data: funding, error: fundingError } = await supabase
+                .from("funding")
+                .select("name, amount")
+                .eq("id", app.funding_id)
+                .single();
+              if (fundingError) console.error(fundingError);
+
+              return {
+                ...app,
+                smme_name: smme?.name || "Unknown",
+                funding_name: funding?.name || "Unknown",
+                amount: funding?.amount || 0,
+                applied_at: app.submitted_at,
+              };
+            })
+          );
+
+          displayApplications(allApplications);
+          updateOverviewCards();
+        } catch (error) {
+          console.error("Error loading applications:", error);
+          document.getElementById(
+            "applicationsTable"
+          ).innerHTML = `<div class="no-data"><p>Error loading applications. Please try again.</p></div>`;
+        }
+      }
+
+      function displayFunding(funding) {
+        if (!funding.length) {
+          document.getElementById(
+            "fundingTable"
+          ).innerHTML = `<div class="no-data"><p>No funding opportunities found.</p></div>`;
+          return;
+        }
+
+        const fundingTable = document.getElementById("fundingTable");
+
+        fundingTable.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Funding Opportunity</th>
+          <th>Sector</th>
+          <th>Amount Range</th>
+          <th>Applications</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${funding
+          .map((opp) => {
+            const amountRange = opp.criteria?.amount_range || "N/A";
+            const deadline = opp.criteria?.deadline
+              ? new Date(opp.criteria.deadline).toLocaleDateString()
+              : "No deadline";
+
+            const sector = opp.criteria?.sector || "General";
+
+            const applicationsCount = allApplications.filter(
+              (app) => app.funding_id === opp.id
+            ).length;
+
+            return `
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">${opp.name}</div>
+                  <div style="font-size: 0.8rem; color: #666;">ID: ${opp.id.substring(
+                    0,
+                    8
+                  )}...</div>
+                </td>
+                <td>${sector}</td>
+                <td class="amount">${amountRange}</td>
+                <td>${applicationsCount}</td>
+                <td>${deadline}</td>
+                <td>
+                  <span class="status-badge ${
+                    opp.status === "active"
+                      ? "status-active"
+                      : opp.status === "pending"
+                      ? "status-pending"
+                      : "status-closed"
+                  }">
+                    ${opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-primary btn-small"
+                      onclick="viewFundingDetails('${opp.id}')">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+
+                    ${
+                      opp.status === "active"
+                        ? `
+                      <button class="btn btn-warning btn-small"
+                        onclick="closeFunding('${opp.id}')">
+                        <i class="fas fa-times"></i> Close
+                      </button>
+                      `
+                        : ""
+                    }
+
+                    <button class="btn btn-danger btn-small"
+                      onclick="deleteFunding('${opp.id}')">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join("")}
+      </tbody>
+    </table>
+  `;
+      }
+
+      // Display applications in table
+      function displayApplications(applications) {
+        if (!applications.length) {
+          document.getElementById(
+            "applicationsTable"
+          ).innerHTML = `<div class="no-data"><p>No applications found.</p></div>`;
+          return;
+        }
+
+        const table = document.getElementById("applicationsTable");
+        table.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>SMME</th>
+          <th>Funding Opportunity</th>
+          <th>Amount Requested</th>
+          <th>Applied Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${applications
+          .map(
+            (app) => `
+          <tr>
+            <td>${app.smme_name}</td>
+            <td>${app.funding_name}</td>
+            <td class="amount">R ${app.amount.toLocaleString()}</td>
+            <td>${new Date(app.applied_at).toLocaleDateString()}</td>
+            <td><span class="status-badge ${
+              app.status === "approved"
+                ? "status-approved"
+                : app.status === "rejected"
+                ? "status-rejected"
+                : "status-pending"
+            }">${
+              app.status === "pending"
+                ? "Pending Review"
+                : app.status.charAt(0).toUpperCase() + app.status.slice(1)
+            }</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-primary btn-small" onclick="viewApplication('${
+                  app.id
+                }')"><i class="fas fa-eye"></i> Review</button>
+                ${
+                  app.status === "pending"
+                    ? `<button class="btn btn-success btn-small" onclick="approveApplication('${app.id}')"><i class="fas fa-check"></i> Approve</button><button class="btn btn-danger btn-small" onclick="rejectApplication('${app.id}')"><i class="fas fa-times"></i> Reject</button>`
+                    : ""
+                }
+              </div>
+            </td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+      }
+
+      // Update overview cards with real counts
+      function updateOverviewCards() {
+        document.getElementById("totalFunding").textContent = allFunding.length;
+        document.getElementById("activeFunding").textContent =
+          allFunding.filter((f) => f.status === "active").length;
+        document.getElementById("totalApplications").textContent =
+          allApplications.length;
+
+        const approvedApplications = allApplications.filter(
+          (a) => a.status === "approved"
+        ).length;
+        const successRate = allApplications.length
+          ? Math.round((approvedApplications / allApplications.length) * 100)
+          : 0;
+        document.getElementById("successRate").textContent = `${successRate}%`;
+      }
+
+      // Populate funding filter for applications tab
+      function populateFundingFilter() {
+        const filter = document.getElementById("fundingAppFilter");
+        filter.innerHTML = `<option value="all">All Opportunities</option>`;
+        allFunding.forEach((f) => {
+          const option = document.createElement("option");
+          option.value = f.name;
+          option.textContent = f.name;
+          filter.appendChild(option);
+        });
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem("fundfinder_user");
+        window.location.href = "login.html";
+      }
+    </script>
+  </body>
+</html>
