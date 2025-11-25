@@ -622,19 +622,26 @@
           console.error("Error loading funder data:", error);
         }
       }
-
       function updateDashboardMetrics() {
         const totalFunding = funderFunding.length;
+
+        // Correct active funding status
         const activeFunding = funderFunding.filter(
-          (f) => f.status === "active"
+          (f) => f.status && f.status.toLowerCase() === "active"
         ).length;
+
         const totalApplications = funderApplications.length;
+
+        // Applications waiting for review
         const pendingReviews = funderApplications.filter(
-          (a) => a.status === "pending"
+          (a) =>
+            a.status && (a.status === "Submitted" || a.status === "In Review")
         ).length;
+
         const approvedApplications = funderApplications.filter(
-          (a) => a.status === "approved"
+          (a) => a.status === "Approved"
         ).length;
+
         const successRate =
           totalApplications > 0
             ? Math.round((approvedApplications / totalApplications) * 100)
@@ -674,11 +681,12 @@
         });
 
         // Add application activities
+        // Add application activities
         funderApplications.slice(0, 3).forEach((app) => {
           activities.push({
             type: "application_received",
             message: `New application received for funding`,
-            time: new Date(app.created_at),
+            time: new Date(app.submitted_at), // corrected
             icon: "fas fa-file-alt",
           });
         });
