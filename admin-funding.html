@@ -433,6 +433,31 @@
         font-weight: 600;
       }
 
+      .status-submitted {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .status-in-review {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status-approved {
+        background: #e6f7ee;
+        color: #0a7b3e;
+      }
+
+      .status-rejected {
+        background: #fde8e8;
+        color: #c53030;
+      }
+
+      .status-needs-more-info {
+        background: #f3e8fd;
+        color: #6b21a8;
+      }
+
       .status-active {
         background: #e6f7ee;
         color: #0a7b3e;
@@ -446,16 +471,6 @@
       .status-closed {
         background: #fde8e8;
         color: #c53030;
-      }
-
-      .status-approved {
-        background: #e0f2fe;
-        color: #0369a1;
-      }
-
-      .status-rejected {
-        background: #fef2f2;
-        color: #dc2626;
       }
 
       .amount {
@@ -760,8 +775,8 @@
             <div class="trend up">+8% from last month</div>
           </div>
           <div class="overview-card">
-            <h3 id="successRate">65%</h3>
-            <p>Match Success Rate</p>
+            <h3 id="successRate">0%</h3>
+            <p>Approval Rate</p>
             <div class="trend up">+3% from last month</div>
           </div>
         </div>
@@ -835,9 +850,11 @@
               <label for="appStatusFilter">Status</label>
               <select id="appStatusFilter" onchange="filterApplications()">
                 <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="Submitted">Submitted</option>
+                <option value="In Review">In Review</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Needs More Info">Needs More Info</option>
               </select>
             </div>
             <div class="filter-group">
@@ -884,13 +901,15 @@
           <div class="metrics-grid">
             <div class="metric-card">
               <h3 id="totalMatches">0</h3>
-              <p>Total Matches</p>
-              <div class="trend up">+15% from last period</div>
+              <p>Total Applications</p>
+              <div class="trend up" id="matchesTrend">+0% from last period</div>
             </div>
             <div class="metric-card">
-              <h3 id="avgProcessingTime">0</h3>
-              <p>Avg. Processing Time (Days)</p>
-              <div class="trend down">-2 days from last period</div>
+              <h3 id="approvalRate">0%</h3>
+              <p>Approval Rate</p>
+              <div class="trend up" id="approvalTrend">
+                +0% from last period
+              </div>
             </div>
             <div class="metric-card">
               <h3 id="topSector">N/A</h3>
@@ -898,23 +917,25 @@
               <div class="trend up">Most applications</div>
             </div>
             <div class="metric-card">
-              <h3 id="fundingUtilization">0%</h3>
-              <p>Funding Utilization</p>
-              <div class="trend up">+8% from last period</div>
+              <h3 id="avgProcessingTime">0</h3>
+              <p>Avg. Response Time (Days)</p>
+              <div class="trend down" id="processingTrend">
+                -0 days from last period
+              </div>
             </div>
           </div>
 
           <div class="chart-container">
             <h3>Applications by Status</h3>
-            <div class="chart-placeholder">
+            <div class="chart-placeholder" id="statusChart">
               <i class="fas fa-chart-pie fa-2x"></i>
               <span style="margin-left: 10px">Applications Status Chart</span>
             </div>
           </div>
 
           <div class="chart-container">
-            <h3>Funding Distribution by Sector</h3>
-            <div class="chart-placeholder">
+            <h3>Applications by Sector</h3>
+            <div class="chart-placeholder" id="sectorChart">
               <i class="fas fa-chart-bar fa-2x"></i>
               <span style="margin-left: 10px">Sector Distribution Chart</span>
             </div>
@@ -1061,54 +1082,106 @@
         }
       }
 
-      // Load applications from Supabase
+      // Load applications from Supabase with proper joins
       async function loadApplications() {
         try {
+          // First get all applications
           const { data: applications, error } = await supabase
             .from("applications")
             .select(
               `
-        id,
-        smme_id,
-        funder_id,
-        funding_id,
-        form_data,
-        status,
-        submitted_at
-      `
+              id,
+              smme_id,
+              funder_id,
+              funding_id,
+              form_data,
+              status,
+              submitted_at,
+              updated_at
+            `
             )
             .order("submitted_at", { ascending: false });
 
           if (error) throw error;
 
-          // Map SMME name and funding name for display
-          allApplications = await Promise.all(
-            applications.map(async (app) => {
-              // Get SMME name
-              const { data: smme, error: smmeError } = await supabase
-                .from("users")
-                .select("name")
-                .eq("id", app.smme_id)
-                .single();
-              if (smmeError) console.error(smmeError);
+          // Get all SMME data
+          const { data: smmes, error: smmesError } = await supabase.from(
+            "smmes"
+          ).select(`
+              user_id,
+              business_name,
+              business_sector,
+              region,
+              profile
+            `);
 
-              // Get funding name
-              const { data: funding, error: fundingError } = await supabase
-                .from("funding")
-                .select("name, amount")
-                .eq("id", app.funding_id)
-                .single();
-              if (fundingError) console.error(fundingError);
+          if (smmesError) console.error("Error loading SMMEs:", smmesError);
 
-              return {
-                ...app,
-                smme_name: smme?.name || "Unknown",
-                funding_name: funding?.name || "Unknown",
-                amount: funding?.amount || 0,
-                applied_at: app.submitted_at,
-              };
-            })
-          );
+          // Get all funding data
+          const { data: funding, error: fundingError } = await supabase.from(
+            "funding"
+          ).select(`
+              id,
+              name,
+              description,
+              criteria
+            `);
+
+          if (fundingError)
+            console.error("Error loading funding:", fundingError);
+
+          // Process applications data
+          allApplications = applications.map((app) => {
+            // Find SMME data
+            const smmeData =
+              smmes?.find((s) => s.user_id === app.smme_id) || {};
+
+            // Find funding data
+            const fundingData =
+              funding?.find((f) => f.id === app.funding_id) || {};
+
+            // Get business info from form_data or smmes table
+            const formData = app.form_data || {};
+            const smmeProfile = smmeData.profile || {};
+
+            return {
+              id: app.id,
+              smme_id: app.smme_id,
+              funder_id: app.funder_id,
+              funding_id: app.funding_id,
+              status: app.status,
+              submitted_at: app.submitted_at,
+              updated_at: app.updated_at,
+              form_data: app.form_data,
+
+              // SMME information - prioritize form_data, then smmes table
+              smme_name:
+                formData.businessName ||
+                smmeData.business_name ||
+                smmeProfile.business_name ||
+                "Unknown Business",
+              smme_sector:
+                formData.businessSector ||
+                smmeData.business_sector ||
+                smmeProfile.sector ||
+                "Unknown Sector",
+              smme_region:
+                formData.region ||
+                smmeData.region ||
+                smmeProfile.region ||
+                "Unknown Region",
+
+              // Funding information
+              funding_name: fundingData.name || "Unknown Funding",
+              funding_description: fundingData.description || "",
+              funding_criteria: fundingData.criteria || {},
+
+              // Amount from form data
+              amount: formData.requestedAmount
+                ? `R ${parseInt(formData.requestedAmount).toLocaleString()}`
+                : "Not specified",
+            };
+          });
 
           filteredApplications = [...allApplications];
           displayApplications(filteredApplications);
@@ -1138,8 +1211,8 @@
           <th>Funding Opportunity</th>
           <th>Sector</th>
           <th>Amount Range</th>
-          <th>Applications</th>
-          <th>Deadline</th>
+          
+          <th>Created Date</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -1147,12 +1220,9 @@
       <tbody>
         ${funding
           .map((opp) => {
-            const amountRange = opp.criteria?.amount_range || "N/A";
-            const deadline = opp.criteria?.deadline
-              ? new Date(opp.criteria.deadline).toLocaleDateString()
-              : "No deadline";
-
+            const amountRange = opp.criteria?.amount_range || "Not specified";
             const sector = opp.criteria?.sector || "General";
+            const createdDate = new Date(opp.created_at).toLocaleDateString();
 
             const applicationsCount = allApplications.filter(
               (app) => app.funding_id === opp.id
@@ -1162,15 +1232,14 @@
               <tr>
                 <td>
                   <div style="font-weight: 600;">${opp.name}</div>
-                  <div style="font-size: 0.8rem; color: var(--color-gray);">ID: ${opp.id.substring(
-                    0,
-                    8
-                  )}...</div>
+                  <div style="font-size: 0.8rem; color: var(--color-gray);">${
+                    opp.description || "No description"
+                  }</div>
                 </td>
                 <td>${sector}</td>
                 <td class="amount">${amountRange}</td>
-                <td>${applicationsCount}</td>
-                <td>${deadline}</td>
+                
+                <td>${createdDate}</td>
                 <td>
                   <span class="status-badge ${
                     opp.status === "active"
@@ -1179,7 +1248,12 @@
                       ? "status-pending"
                       : "status-closed"
                   }">
-                    ${opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}
+                    ${
+                      opp.status
+                        ? opp.status.charAt(0).toUpperCase() +
+                          opp.status.slice(1)
+                        : "Active"
+                    }
                   </span>
                 </td>
                 <td>
@@ -1229,8 +1303,10 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>SMME</th>
+          <th>SMME Business</th>
           <th>Funding Opportunity</th>
+          <th>Sector</th>
+          <th>Region</th>
           <th>Amount Requested</th>
           <th>Applied Date</th>
           <th>Status</th>
@@ -1242,29 +1318,73 @@
           .map(
             (app) => `
           <tr>
-            <td>${app.smme_name}</td>
+            <td>
+              <div style="font-weight: 600;">${app.smme_name}</div>
+              <div style="font-size: 0.8rem; color: var(--color-gray);">ID: ${
+                app.smme_id?.substring(0, 8) || "N/A"
+              }...</div>
+            </td>
             <td>${app.funding_name}</td>
-            <td class="amount">R ${app.amount.toLocaleString()}</td>
-            <td>${new Date(app.applied_at).toLocaleDateString()}</td>
-            <td><span class="status-badge ${
-              app.status === "approved"
-                ? "status-approved"
-                : app.status === "rejected"
-                ? "status-rejected"
-                : "status-pending"
-            }">${
-              app.status === "pending"
-                ? "Pending Review"
-                : app.status.charAt(0).toUpperCase() + app.status.slice(1)
-            }</span></td>
+            <td>${app.smme_sector}</td>
+            <td>${app.smme_region}</td>
+            <td class="amount">${app.amount}</td>
+            <td>${new Date(app.submitted_at).toLocaleDateString()}</td>
+            <td>
+              <span class="status-badge ${
+                app.status === "Approved"
+                  ? "status-approved"
+                  : app.status === "Rejected"
+                  ? "status-rejected"
+                  : app.status === "In Review"
+                  ? "status-in-review"
+                  : app.status === "Needs More Info"
+                  ? "status-needs-more-info"
+                  : "status-submitted"
+              }">
+                ${app.status}
+              </span>
+            </td>
             <td>
               <div class="actions">
                 <button class="btn btn-primary btn-small" onclick="viewApplication('${
                   app.id
-                }')"><i class="fas fa-eye"></i> Review</button>
+                }')">
+                  <i class="fas fa-eye"></i> Review
+                </button>
                 ${
-                  app.status === "pending"
-                    ? `<button class="btn btn-success btn-small" onclick="approveApplication('${app.id}')"><i class="fas fa-check"></i> Approve</button><button class="btn btn-danger btn-small" onclick="rejectApplication('${app.id}')"><i class="fas fa-times"></i> Reject</button>`
+                  app.status === "Submitted" ||
+                  app.status === "In Review" ||
+                  app.status === "Needs More Info"
+                    ? `
+                  <button class="btn btn-success btn-small" onclick="updateApplicationStatus('${
+                    app.id
+                  }', 'Approved')">
+                    <i class="fas fa-check"></i> Approve
+                  </button>
+                  <button class="btn btn-danger btn-small" onclick="updateApplicationStatus('${
+                    app.id
+                  }', 'Rejected')">
+                    <i class="fas fa-times"></i> Reject
+                  </button>
+                  ${
+                    app.status !== "In Review"
+                      ? `
+                  <button class="btn btn-warning btn-small" onclick="updateApplicationStatus('${app.id}', 'In Review')">
+                    <i class="fas fa-search"></i> Review
+                  </button>
+                  `
+                      : ""
+                  }
+                  ${
+                    app.status !== "Needs More Info"
+                      ? `
+                  <button class="btn btn-warning btn-small" onclick="updateApplicationStatus('${app.id}', 'Needs More Info')">
+                    <i class="fas fa-info-circle"></i> More Info
+                  </button>
+                  `
+                      : ""
+                  }
+                  `
                     : ""
                 }
               </div>
@@ -1287,7 +1407,7 @@
           allApplications.length;
 
         const approvedApplications = allApplications.filter(
-          (a) => a.status === "approved"
+          (a) => a.status === "Approved"
         ).length;
         const successRate = allApplications.length
           ? Math.round((approvedApplications / allApplications.length) * 100)
@@ -1299,11 +1419,18 @@
       function populateFundingFilter() {
         const filter = document.getElementById("fundingAppFilter");
         filter.innerHTML = `<option value="all">All Opportunities</option>`;
-        allFunding.forEach((f) => {
-          const option = document.createElement("option");
-          option.value = f.name;
-          option.textContent = f.name;
-          filter.appendChild(option);
+
+        // Get unique funding names
+        const uniqueFundingNames = [
+          ...new Set(allApplications.map((app) => app.funding_name)),
+        ];
+        uniqueFundingNames.forEach((name) => {
+          if (name && name !== "Unknown Funding") {
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            filter.appendChild(option);
+          }
         });
       }
 
@@ -1324,6 +1451,11 @@
 
         // Add active class to clicked tab
         event.target.classList.add("active");
+
+        // Update performance metrics when switching to performance tab
+        if (tabName === "performance") {
+          updatePerformanceMetrics();
+        }
       }
 
       // Filter funding opportunities
@@ -1374,51 +1506,157 @@
       // Update performance metrics
       function updatePerformanceMetrics() {
         const period = document.getElementById("periodFilter").value;
+        const now = new Date();
+        let startDate;
 
-        // Calculate metrics based on the selected period
-        const totalMatches = allApplications.filter(
-          (app) => app.status === "approved"
+        // Calculate start date based on period
+        switch (period) {
+          case "7days":
+            startDate = new Date(now.setDate(now.getDate() - 7));
+            break;
+          case "30days":
+            startDate = new Date(now.setDate(now.getDate() - 30));
+            break;
+          case "90days":
+            startDate = new Date(now.setDate(now.getDate() - 90));
+            break;
+          case "1year":
+            startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+            break;
+          default:
+            startDate = new Date(now.setDate(now.getDate() - 30));
+        }
+
+        // Filter applications by period
+        const periodApplications = allApplications.filter(
+          (app) => new Date(app.submitted_at) >= startDate
+        );
+
+        // Calculate metrics
+        const totalApplications = periodApplications.length;
+        const approvedApplications = periodApplications.filter(
+          (app) => app.status === "Approved"
         ).length;
-        document.getElementById("totalMatches").textContent = totalMatches;
-
-        // Calculate average processing time (simplified)
-        const avgProcessingTime = Math.round(Math.random() * 10) + 2;
-        document.getElementById("avgProcessingTime").textContent =
-          avgProcessingTime;
+        const approvalRate =
+          totalApplications > 0
+            ? Math.round((approvedApplications / totalApplications) * 100)
+            : 0;
 
         // Find top sector
         const sectorCounts = {};
-        allFunding.forEach((f) => {
-          const sector = f.criteria?.sector || "General";
+        periodApplications.forEach((app) => {
+          const sector = app.smme_sector;
           sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
         });
 
         let topSector = "N/A";
         let maxCount = 0;
         for (const [sector, count] of Object.entries(sectorCounts)) {
-          if (count > maxCount) {
+          if (count > maxCount && sector !== "Unknown Sector") {
             maxCount = count;
             topSector = sector;
           }
         }
-        document.getElementById("topSector").textContent = topSector;
 
-        // Calculate funding utilization (simplified)
-        const totalFundingAmount = allFunding.reduce(
-          (sum, f) => sum + (f.amount || 0),
-          0
-        );
-        const allocatedFunding = allApplications
-          .filter((app) => app.status === "approved")
-          .reduce((sum, app) => sum + (app.amount || 0), 0);
+        // Calculate average processing time (simplified - using days between submitted and updated)
+        let totalProcessingDays = 0;
+        let processedCount = 0;
 
-        const utilizationRate =
-          totalFundingAmount > 0
-            ? Math.round((allocatedFunding / totalFundingAmount) * 100)
+        periodApplications.forEach((app) => {
+          if (
+            app.updated_at &&
+            app.submitted_at &&
+            app.status !== "Submitted"
+          ) {
+            const submitted = new Date(app.submitted_at);
+            const updated = new Date(app.updated_at);
+            const days = Math.ceil(
+              (updated - submitted) / (1000 * 60 * 60 * 24)
+            );
+            if (days > 0) {
+              totalProcessingDays += days;
+              processedCount++;
+            }
+          }
+        });
+
+        const avgProcessingTime =
+          processedCount > 0
+            ? Math.round(totalProcessingDays / processedCount)
             : 0;
+
+        // Update UI
+        document.getElementById("totalMatches").textContent = totalApplications;
         document.getElementById(
-          "fundingUtilization"
-        ).textContent = `${utilizationRate}%`;
+          "approvalRate"
+        ).textContent = `${approvalRate}%`;
+        document.getElementById("topSector").textContent = topSector;
+        document.getElementById("avgProcessingTime").textContent =
+          avgProcessingTime;
+
+        // Update trends (simplified - using random values for demo)
+        document.getElementById("matchesTrend").textContent = `+${
+          Math.floor(Math.random() * 20) + 5
+        }% from last period`;
+        document.getElementById("approvalTrend").textContent = `${
+          Math.random() > 0.5 ? "+" : "-"
+        }${Math.floor(Math.random() * 10) + 1}% from last period`;
+        document.getElementById("processingTrend").textContent = `-${
+          Math.floor(Math.random() * 3) + 1
+        } days from last period`;
+
+        // Update chart data display
+        updateChartData();
+      }
+
+      // Update chart data display
+      function updateChartData() {
+        // Applications by Status
+        const statusCounts = {};
+        allApplications.forEach((app) => {
+          statusCounts[app.status] = (statusCounts[app.status] || 0) + 1;
+        });
+
+        const statusChart = document.getElementById("statusChart");
+        statusChart.innerHTML = `
+          <div style="padding: 1rem; text-align: center;">
+            <h4 style="margin-bottom: 1rem;">Application Status Distribution</h4>
+            ${Object.entries(statusCounts)
+              .map(
+                ([status, count]) => `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--color-gray-light); border-radius: var(--border-radius-sm);">
+                <span>${status}</span>
+                <span style="font-weight: bold;">${count}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+
+        // Applications by Sector
+        const sectorCounts = {};
+        allApplications.forEach((app) => {
+          const sector = app.smme_sector;
+          sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+        });
+
+        const sectorChart = document.getElementById("sectorChart");
+        sectorChart.innerHTML = `
+          <div style="padding: 1rem; text-align: center;">
+            <h4 style="margin-bottom: 1rem;">Applications by Sector</h4>
+            ${Object.entries(sectorCounts)
+              .map(
+                ([sector, count]) => `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--color-gray-light); border-radius: var(--border-radius-sm);">
+                <span>${sector}</span>
+                <span style="font-weight: bold;">${count}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        `;
       }
 
       // Modal functions
@@ -1431,7 +1669,29 @@
         document.getElementById("addFundingForm").reset();
       }
 
-      // Form submission
+      // Update application status
+      async function updateApplicationStatus(applicationId, newStatus) {
+        try {
+          const { data, error } = await supabase
+            .from("applications")
+            .update({
+              status: newStatus,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", applicationId);
+
+          if (error) throw error;
+
+          // Reload applications to reflect the change
+          await loadApplications();
+          alert(`Application status updated to ${newStatus}`);
+        } catch (error) {
+          console.error("Error updating application status:", error);
+          alert("Error updating application status. Please try again.");
+        }
+      }
+
+      // Form submission for new funding
       document
         .getElementById("addFundingForm")
         .addEventListener("submit", async (e) => {
@@ -1439,10 +1699,12 @@
 
           const fundingData = {
             name: document.getElementById("fundingName").value,
-            amount: parseFloat(document.getElementById("fundingAmount").value),
+            description: document.getElementById("fundingDescription").value,
             criteria: {
               sector: document.getElementById("fundingSector").value,
-              description: document.getElementById("fundingDescription").value,
+              amount_range: `R${
+                document.getElementById("fundingAmount").value
+              }`,
               eligibility: document.getElementById("fundingCriteria").value,
               deadline: document.getElementById("fundingDeadline").value,
             },
@@ -1491,20 +1753,6 @@
 
       function viewApplication(id) {
         alert(`View application details for ID: ${id}`);
-      }
-
-      function approveApplication(id) {
-        if (confirm("Are you sure you want to approve this application?")) {
-          alert(`Application ${id} approved`);
-          // Implement actual approval logic here
-        }
-      }
-
-      function rejectApplication(id) {
-        if (confirm("Are you sure you want to reject this application?")) {
-          alert(`Application ${id} rejected`);
-          // Implement actual rejection logic here
-        }
       }
 
       function exportFundingData() {
