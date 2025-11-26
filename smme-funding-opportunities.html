@@ -619,6 +619,26 @@
         font-size: 0.9rem;
         line-height: 1.6;
       }
+      .ai-generated-text.editable {
+        background: #fff !important;
+        border: 2px solid #2d2dff !important;
+        resize: vertical;
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        padding: 1rem;
+        border-radius: 6px;
+        min-height: 120px;
+        width: 100%;
+        box-sizing: border-box;
+        white-space: pre-wrap;
+      }
+
+      .ai-generated-text.editable:focus {
+        outline: none;
+        border-color: #2d2dff;
+        box-shadow: 0 0 0 3px rgba(45, 45, 255, 0.1);
+      }
 
       /* File Upload Styles */
       .file-upload-section {
@@ -740,6 +760,20 @@
         justify-content: center;
       }
 
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .opportunity-card {
+        animation: fadeIn 0.5s ease-in;
+      }
       @media (max-width: 768px) {
         .header {
           flex-direction: column;
@@ -902,11 +936,14 @@
           </div>
 
           <!-- AI-Generated Project Summary -->
+          <!-- AI-Generated Project Summary -->
           <div class="ai-generated-section">
             <h4><i class="fas fa-robot"></i> AI-Generated Project Summary</h4>
-            <div class="ai-generated-text" id="projectSummaryText">
-              Generating project summary...
-            </div>
+            <textarea
+              class="ai-generated-text editable"
+              id="projectSummaryText"
+              placeholder="AI is generating your project summary..."
+            ></textarea>
             <button
               type="button"
               class="btn btn-secondary btn-full"
@@ -920,9 +957,11 @@
           <!-- AI-Generated Motivation Letter -->
           <div class="ai-generated-section">
             <h4><i class="fas fa-robot"></i> AI-Generated Motivation Letter</h4>
-            <div class="ai-generated-text" id="motivationText">
-              Generating motivation letter...
-            </div>
+            <textarea
+              class="ai-generated-text editable"
+              id="motivationText"
+              placeholder="AI is generating your motivation letter..."
+            ></textarea>
             <button
               type="button"
               class="btn btn-secondary btn-full"
@@ -1104,14 +1143,14 @@
           );
           allFundingOpportunities = fundingOpportunities;
 
-          // Use AI for intelligent matching based on criteria
-          console.log("🤖 Starting AI criteria matching...");
-          const matchingResults = await matchWithAI(
+          // Use REAL AI for intelligent matching - NO FALLBACK
+          console.log("🤖 Starting REAL AI criteria matching...");
+          const matchingResults = await matchWithRealAI(
             profile,
             fundingOpportunities
           );
 
-          console.log("✅ AI matching completed:", matchingResults);
+          console.log("✅ REAL AI matching completed:", matchingResults);
 
           // Display matching results
           displayMatchingResults(matchingResults);
@@ -1119,14 +1158,14 @@
         } catch (error) {
           console.error("❌ Error loading data:", error);
           opportunitiesContainer.innerHTML = `
-            <div class="no-results">
-              <h3>Error loading opportunities</h3>
-              <p>Please try refreshing the page</p>
-              <button class="btn btn-primary" onclick="location.reload()">
-                <i class="fas fa-redo"></i> Refresh Page
-              </button>
-            </div>
-          `;
+        <div class="no-results">
+          <h3>AI Matching Unavailable</h3>
+          <p>Real AI matching is currently unavailable. Please try again later.</p>
+          <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-redo"></i> Retry AI Matching
+          </button>
+        </div>
+      `;
         } finally {
           loading.style.display = "none";
           console.log("🏁 Loading complete");
@@ -1139,298 +1178,219 @@
         let criteriaHTML = "";
 
         if (profile.criteria) {
-          // Display structured criteria
           criteriaHTML = `
-            <div class="criteria-grid">
-              ${
-                profile.criteria.sector
-                  ? `
-                <div class="criteria-item">
-                  <strong>Business Sector</strong>
-                  <span>${profile.criteria.sector}</span>
-                </div>
-              `
-                  : ""
-              }
-              
-              ${
-                profile.criteria.region
-                  ? `
-                <div class="criteria-item">
-                  <strong>Operating Region</strong>
-                  <span>${profile.criteria.region}</span>
-                </div>
-              `
-                  : ""
-              }
-              
-              ${
-                profile.criteria.funding_amount_min
-                  ? `
-                <div class="criteria-item">
-                  <strong>Funding Needed</strong>
-                  <span>R${profile.criteria.funding_amount_min.toLocaleString()} - R${
-                      profile.criteria.funding_amount_max
-                        ? profile.criteria.funding_amount_max.toLocaleString()
-                        : "Open"
-                    }</span>
-                </div>
-              `
-                  : ""
-              }
-              
-              ${
-                profile.criteria.business_stage
-                  ? `
-                <div class="criteria-item">
-                  <strong>Business Stage</strong>
-                  <span>${profile.criteria.business_stage}</span>
-                </div>
-              `
-                  : ""
-              }
-
-              ${
-                profile.criteria.employees
-                  ? `
-                <div class="criteria-item">
-                  <strong>Employees</strong>
-                  <span>${profile.criteria.employees}</span>
-                </div>
-              `
-                  : ""
-              }
-
-              ${
-                profile.criteria.years_in_operation
-                  ? `
-                <div class="criteria-item">
-                  <strong>Years in Operation</strong>
-                  <span>${profile.criteria.years_in_operation}</span>
-                </div>
-              `
-                  : ""
-              }
+        <div class="criteria-grid">
+          ${
+            profile.criteria.sector
+              ? `
+            <div class="criteria-item">
+              <strong>Business Sector</strong>
+              <span>${profile.criteria.sector}</span>
             </div>
-          `;
-        } else {
-          // Fallback to basic profile info
-          criteriaHTML = `
-            <div class="criteria-grid">
-              <div class="criteria-item">
-                <strong>Business Sector</strong>
-                <span>${profile.business_sector}</span>
-              </div>
-              <div class="criteria-item">
-                <strong>Operating Region</strong>
-                <span>${profile.region}</span>
-              </div>
-              <div class="criteria-item">
-                <strong>Years in Operation</strong>
-                <span>${profile.years_in_operation} years</span>
-              </div>
-              <div class="criteria-item">
-                <strong>Business Stage</strong>
-                <span>${
-                  profile.years_in_operation > 3 ? "Established" : "Growing"
+          `
+              : ""
+          }
+          
+          ${
+            profile.criteria.region
+              ? `
+            <div class="criteria-item">
+              <strong>Operating Region</strong>
+              <span>${profile.criteria.region}</span>
+            </div>
+          `
+              : ""
+          }
+          
+          ${
+            profile.criteria.funding_amount_min
+              ? `
+            <div class="criteria-item">
+              <strong>Funding Needed</strong>
+              <span>R${profile.criteria.funding_amount_min.toLocaleString()} - R${
+                  profile.criteria.funding_amount_max
+                    ? profile.criteria.funding_amount_max.toLocaleString()
+                    : "Open"
                 }</span>
-              </div>
-              ${
-                profile.number_of_employees
-                  ? `
-                <div class="criteria-item">
-                  <strong>Employees</strong>
-                  <span>${profile.number_of_employees}</span>
-                </div>
-              `
-                  : ""
-              }
             </div>
-          `;
+          `
+              : ""
+          }
+          
+          ${
+            profile.criteria.business_stage
+              ? `
+            <div class="criteria-item">
+              <strong>Business Stage</strong>
+              <span>${profile.criteria.business_stage}</span>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            profile.criteria.employees
+              ? `
+            <div class="criteria-item">
+              <strong>Employees</strong>
+              <span>${profile.criteria.employees}</span>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            profile.criteria.years_in_operation
+              ? `
+            <div class="criteria-item">
+              <strong>Years in Operation</strong>
+              <span>${profile.criteria.years_in_operation}</span>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      `;
+        } else {
+          criteriaHTML = `
+        <div class="criteria-grid">
+          <div class="criteria-item">
+            <strong>Business Sector</strong>
+            <span>${profile.business_sector}</span>
+          </div>
+          <div class="criteria-item">
+            <strong>Operating Region</strong>
+            <span>${profile.region}</span>
+          </div>
+          <div class="criteria-item">
+            <strong>Years in Operation</strong>
+            <span>${profile.years_in_operation} years</span>
+          </div>
+          <div class="criteria-item">
+            <strong>Business Stage</strong>
+            <span>${
+              profile.years_in_operation > 3 ? "Established" : "Growing"
+            }</span>
+          </div>
+          ${
+            profile.number_of_employees
+              ? `
+            <div class="criteria-item">
+              <strong>Employees</strong>
+              <span>${profile.number_of_employees}</span>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      `;
         }
 
         profileCriteria.innerHTML = criteriaHTML;
       }
 
-      async function matchWithAI(profile, opportunities) {
-        console.log("🔍 Starting AI matching...");
-
-        // Prepare criteria data
-        const smmeCriteria = profile.criteria || {
-          sector: profile.business_sector,
-          region: profile.region,
-          business_stage:
-            profile.years_in_operation > 3 ? "established" : "startup",
-          years_in_operation: profile.years_in_operation,
-          employees: profile.number_of_employees,
-          revenue: profile.annual_revenue,
-        };
+      async function matchWithRealAI(profile, opportunities) {
+        console.log("🔍 Starting REAL AI matching with progressive loading...");
 
         const matchedOpportunities = [];
 
+        // Clear loading and show initial message
+        loading.innerHTML = `
+    <div class="spinner"></div>
+    <p>🤖 AI is analyzing ${opportunities.length} funding opportunities...</p>
+    <p><small>Matches will appear below as they are processed</small></p>
+  `;
+
+        // Create a container for progressive results
+        opportunitiesContainer.innerHTML = `
+    <div id="progressContainer" style="text-align: center; padding: 2rem;">
+      <h3>🤖 AI Matching in Progress</h3>
+      <p>Analyzing opportunities one by one...</p>
+      <div id="progressStats" style="margin: 1rem 0;">
+        <div style="display: inline-block; background: #e0e7ff; padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+          <strong>0</strong> / ${opportunities.length}
+        </div>
+        <div style="display: inline-block; background: #f0f9ff; padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+          <strong>0</strong> matches found
+        </div>
+      </div>
+    </div>
+    <div id="liveResults"></div>
+  `;
+
+        const progressContainer = document.getElementById("progressContainer");
+        const progressStats = document.getElementById("progressStats");
+        const liveResults = document.getElementById("liveResults");
+
+        let processedCount = 0;
+        let matchesFound = 0;
+
         for (const opportunity of opportunities) {
-          if (!opportunity.criteria) continue;
-
-          let matchScore = 0;
-          let matchReasoning = "";
-          const aiSuggestions = [];
-
-          // Enhanced criteria matching logic
-          const funderCriteria = opportunity.criteria;
-
-          // Sector matching
-          if (funderCriteria.sector && smmeCriteria.sector) {
-            const profileSector = smmeCriteria.sector.toLowerCase();
-            const funderSector = funderCriteria.sector.toLowerCase();
-
-            if (funderSector === "any" || funderSector === "all") {
-              matchScore += 20;
-              matchReasoning += "Sector-agnostic funding. ";
-            } else if (
-              funderSector.includes(profileSector) ||
-              profileSector.includes(funderSector)
-            ) {
-              matchScore += 30;
-              matchReasoning += `Perfect sector match (${smmeCriteria.sector}). `;
-            } else if (checkSectorCompatibility(profileSector, funderSector)) {
-              matchScore += 15;
-              matchReasoning += `Compatible sector match. `;
-            }
+          if (!opportunity.criteria) {
+            processedCount++;
+            updateProgress(processedCount, opportunities.length, matchesFound);
+            continue;
           }
 
-          // Region matching
-          if (funderCriteria.region && smmeCriteria.region) {
-            const profileRegion = smmeCriteria.region.toLowerCase();
-            const funderRegion = funderCriteria.region.toLowerCase();
-
-            if (
-              funderRegion === "national" ||
-              funderRegion === "south africa"
-            ) {
-              matchScore += 25;
-              matchReasoning += "National funding coverage. ";
-            } else if (
-              funderRegion.includes(profileRegion) ||
-              profileRegion.includes(funderRegion)
-            ) {
-              matchScore += 25;
-              matchReasoning += `Perfect regional match (${smmeCriteria.region}). `;
-            }
-          }
-
-          // Business stage matching
-          if (funderCriteria.business_stage && smmeCriteria.business_stage) {
-            const profileStage = smmeCriteria.business_stage.toLowerCase();
-            const funderStage = funderCriteria.business_stage.toLowerCase();
-
-            if (
-              funderStage === "any" ||
-              funderStage.includes(profileStage) ||
-              profileStage.includes(funderStage)
-            ) {
-              matchScore += 15;
-              matchReasoning += `Appropriate business stage (${smmeCriteria.business_stage}). `;
-            }
-          }
-
-          // Funding amount matching
-          if (
-            funderCriteria.funding_amount_min &&
-            smmeCriteria.funding_amount_min
-          ) {
-            const neededMin = parseFloat(smmeCriteria.funding_amount_min);
-            const offeredMin = parseFloat(funderCriteria.funding_amount_min);
-            const offeredMax =
-              parseFloat(funderCriteria.funding_amount_max) || Infinity;
-
-            if (neededMin >= offeredMin && neededMin <= offeredMax) {
-              matchScore += 20;
-              matchReasoning += "Funding amount aligns with needs. ";
-            } else if (neededMin <= offeredMax) {
-              matchScore += 10;
-              matchReasoning += "Funding amount partially matches. ";
-              aiSuggestions.push(
-                "Consider adjusting your funding request to better match this opportunity"
-              );
-            }
-          }
-
-          // Employee count matching
-          if (funderCriteria.employees_min && smmeCriteria.employees) {
-            if (smmeCriteria.employees >= funderCriteria.employees_min) {
-              matchScore += 5;
-              matchReasoning += "Meets employee requirements. ";
-            }
-          }
-
-          // Years in operation matching
-          if (
-            funderCriteria.years_in_operation_min &&
-            smmeCriteria.years_in_operation
-          ) {
-            if (
-              smmeCriteria.years_in_operation >=
-              funderCriteria.years_in_operation_min
-            ) {
-              matchScore += 5;
-              matchReasoning += "Meets business experience requirements. ";
-            }
-          }
-
-          // Special program matching (women, youth, etc.)
-          if (funderCriteria.owner_gender === "female") {
-            aiSuggestions.push(
-              "This fund specifically supports women entrepreneurs - highlight your unique perspective"
+          try {
+            const aiMatchResult = await getRealAIMatchAnalysis(
+              profile,
+              opportunity
             );
-            matchScore += 10;
-          }
 
-          if (funderCriteria.owner_age_max === 35) {
-            aiSuggestions.push(
-              "This youth fund values innovation and fresh ideas - emphasize your unique approach"
+            if (aiMatchResult.matchScore >= 20) {
+              const matchedOpportunity = {
+                ...opportunity,
+                ...aiMatchResult,
+              };
+              matchedOpportunities.push(matchedOpportunity);
+              matchesFound++;
+
+              // Immediately display this match
+              displaySingleOpportunity(matchedOpportunity, liveResults);
+            }
+
+            processedCount++;
+            updateProgress(processedCount, opportunities.length, matchesFound);
+          } catch (error) {
+            console.error(
+              `❌ REAL AI matching failed for opportunity ${opportunity.id}:`,
+              error
             );
-            matchScore += 10;
+            processedCount++;
+            updateProgress(processedCount, opportunities.length, matchesFound);
+            continue;
           }
 
-          // Additional matching factors
-          if (smmeCriteria.years_in_operation >= 3) {
-            matchScore += 5;
-            aiSuggestions.push(
-              "Highlight your business experience and stability"
-            );
-          }
-
-          if (smmeCriteria.employees > 5) {
-            matchScore += 5;
-            aiSuggestions.push("Emphasize job creation and team strength");
-          }
-
-          // Ensure score is within bounds and add to results if above threshold
-          matchScore = Math.min(Math.max(matchScore, 0), 100);
-
-          if (matchScore >= 20) {
-            // Lower threshold to show more opportunities
-            matchedOpportunities.push({
-              ...opportunity,
-              matchScore: matchScore,
-              matchReasoning:
-                matchReasoning ||
-                "Good overall fit based on criteria analysis.",
-              aiSuggestions:
-                aiSuggestions.length > 0
-                  ? aiSuggestions
-                  : [
-                      "Provide detailed financial projections",
-                      "Include market research and customer validation",
-                      "Clearly articulate your competitive advantage",
-                    ],
-            });
-          }
+          // Small delay to make progressive loading more visible (optional)
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         console.log(
-          `✅ AI matching found ${matchedOpportunities.length} opportunities`
+          `✅ REAL AI matching found ${matchedOpportunities.length} opportunities`
         );
+
+        // Final update when all processing is complete
+        if (matchedOpportunities.length === 0) {
+          progressContainer.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <h3>🤖 AI Analysis Complete</h3>
+        <p>No strong matches found. Try updating your business criteria.</p>
+        <div style="margin-top: 1rem;">
+          <a href="smme-profile.html" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Update Criteria
+          </a>
+        </div>
+      </div>
+    `;
+        } else {
+          progressContainer.innerHTML = `
+      <div style="text-align: center; padding: 1rem; background: #f0f9ff; border-radius: 8px; margin: 1rem 0;">
+        <h4>✅ AI Analysis Complete!</h4>
+        <p>Found ${matchedOpportunities.length} matching opportunities</p>
+      </div>
+    `;
+        }
 
         return {
           totalOpportunities: opportunities.length,
@@ -1448,40 +1408,270 @@
         };
       }
 
-      // Helper function for sector compatibility
-      function checkSectorCompatibility(profileSector, funderSector) {
-        const sectorGroups = {
-          technology: [
-            "tech",
-            "software",
-            "hardware",
-            "it",
-            "digital",
-            "innovation",
-          ],
-          manufacturing: ["production", "factory", "industrial", "assembly"],
-          services: [
-            "consulting",
-            "professional",
-            "business services",
-            "support",
-          ],
-          retail: ["ecommerce", "consumer goods", "sales", "distribution"],
-          agriculture: ["farming", "agri", "food production", "rural"],
-          tourism: ["hospitality", "travel", "accommodation", "tourism"],
-          healthcare: ["medical", "clinic", "wellness", "pharmacy", "health"],
-          energy: ["renewable", "solar", "wind", "green", "sustainability"],
-        };
-
-        for (const [group, sectors] of Object.entries(sectorGroups)) {
-          if (
-            sectors.includes(profileSector) &&
-            sectors.includes(funderSector)
-          ) {
-            return true;
-          }
+      function updateProgress(processed, total, matches) {
+        const progressStats = document.getElementById("progressStats");
+        if (progressStats) {
+          progressStats.innerHTML = `
+      <div style="display: inline-block; background: #e0e7ff; padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+        <strong>${processed}</strong> / ${total} processed
+      </div>
+      <div style="display: inline-block; background: #f0f9ff; padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+        <strong>${matches}</strong> matches found
+      </div>
+    `;
         }
-        return false;
+      }
+
+      function displaySingleOpportunity(opportunity, container) {
+        const matchLevel = getMatchLevel(opportunity.matchScore);
+        const fundingBadge = getFundingTypeBadge(opportunity);
+        const fundingIcon = getFundingTypeIcon(opportunity);
+
+        const opportunityElement = document.createElement("div");
+        opportunityElement.innerHTML = `
+    <div class="opportunity-card ${
+      matchLevel.level
+    }-match" style="animation: fadeIn 0.5s ease-in;">
+      ${
+        fundingBadge
+          ? `
+        <div class="opportunity-badge ${fundingBadge.class}">
+          ${fundingBadge.label}
+        </div>
+      `
+          : ""
+      }
+      
+      <div class="opportunity-header">
+        <div class="opportunity-title">
+          <h3><i class="${fundingIcon}"></i> ${opportunity.name}</h3>
+          <p>${opportunity.description || "No description available"}</p>
+          <div class="funding-type-indicator">
+            <i class="fas fa-tag"></i>
+            ${getFundingTypeDescription(opportunity)}
+          </div>
+        </div>
+        <div class="match-badge ${matchLevel.level}">
+          ${opportunity.matchScore}% AI Match
+        </div>
+      </div>
+
+      <div class="opportunity-details">
+        ${
+          opportunity.criteria?.funding_amount_min
+            ? `
+          <div class="detail-item">
+            <strong>Funding Range</strong>
+            <span>R${opportunity.criteria.funding_amount_min.toLocaleString()} - R${
+                opportunity.criteria.funding_amount_max
+                  ? opportunity.criteria.funding_amount_max.toLocaleString()
+                  : "Open"
+              }</span>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          opportunity.criteria?.sector
+            ? `
+          <div class="detail-item">
+            <strong>Sector Focus</strong>
+            <span>${
+              opportunity.criteria.sector.charAt(0).toUpperCase() +
+              opportunity.criteria.sector.slice(1)
+            }</span>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          opportunity.criteria?.region
+            ? `
+          <div class="detail-item">
+            <strong>Region Focus</strong>
+            <span>${
+              opportunity.criteria.region.charAt(0).toUpperCase() +
+              opportunity.criteria.region.slice(1)
+            }</span>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          opportunity.criteria?.business_stage
+            ? `
+          <div class="detail-item">
+            <strong>Business Stage</strong>
+            <span>${
+              opportunity.criteria.business_stage.charAt(0).toUpperCase() +
+              opportunity.criteria.business_stage.slice(1)
+            }</span>
+          </div>
+        `
+            : ""
+        }
+      </div>
+
+      <div class="match-analysis">
+        <h4><i class="fas fa-robot"></i> REAL AI Analysis</h4>
+        <div class="match-reasons">${opportunity.matchReasoning}</div>
+      </div>
+
+      <div class="ai-suggestions">
+        <h4><i class="fas fa-lightbulb"></i> AI Application Strategy</h4>
+        <ul>
+          ${opportunity.aiSuggestions
+            .map(
+              (suggestion) =>
+                `<li><i class="fas fa-check"></i> ${suggestion}</li>`
+            )
+            .join("")}
+        </ul>
+      </div>
+
+      <div class="opportunity-actions">
+        <button class="btn btn-secondary" onclick="viewDetails('${
+          opportunity.id
+        }')">
+          <i class="fas fa-info-circle"></i> View Details
+        </button>
+        <button class="btn btn-primary" onclick="applyForFunding('${
+          opportunity.id
+        }')">
+          <i class="fas fa-paper-plane"></i> Apply Now
+        </button>
+      </div>
+    </div>
+  `;
+
+        // Add fade-in animation
+        container.appendChild(opportunityElement);
+      }
+
+      async function getRealAIMatchAnalysis(profile, opportunity) {
+        console.log(`🤖 REAL AI analyzing match for: ${opportunity.name}`);
+
+        const prompt = `
+CRITICAL: You MUST respond with ONLY valid JSON. No other text.
+
+Analyze the compatibility between this business and funding opportunity. Provide a JSON response with:
+- matchScore (0-100)
+- matchReasoning (string explaining key compatibility factors)
+- aiSuggestions (array of 3 application tips)
+
+BUSINESS PROFILE:
+- Name: ${profile.business_name}
+- Sector: ${profile.business_sector}
+- Region: ${profile.region}
+- Years in Operation: ${profile.years_in_operation}
+- Employees: ${profile.number_of_employees}
+- Business Stage: ${profile.criteria?.business_stage || "Not specified"}
+- Funding Need: R${
+          profile.criteria?.funding_amount_min || "Not specified"
+        } - R${profile.criteria?.funding_amount_max || "Open"}
+- Project: ${profile.project_description}
+
+FUNDING OPPORTUNITY:
+- Name: ${opportunity.name}
+- Description: ${opportunity.description}
+- Sector Focus: ${opportunity.criteria?.sector || "Any"}
+- Region Focus: ${opportunity.criteria?.region || "National"}
+- Business Stage: ${opportunity.criteria?.business_stage || "Any"}
+- Funding Range: ${opportunity.criteria?.amount_range || "Not specified"}
+- Requirements: ${opportunity.criteria?.requirements || "None"}
+
+Consider sector alignment, regional fit, business stage compatibility, funding amount appropriateness, and overall strategic fit. Be realistic but encouraging.
+
+RESPONSE FORMAT (JSON ONLY):
+{
+  "matchScore": 85,
+  "matchReasoning": "Strong sector alignment and regional fit...",
+  "aiSuggestions": ["Tip 1", "Tip 2", "Tip 3"]
+}
+`;
+
+        try {
+          // Using the latest Gemini 2.0 Flash model with correct API structure
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: prompt,
+                      },
+                    ],
+                  },
+                ],
+                generationConfig: {
+                  temperature: 0.3,
+                  maxOutputTokens: 800,
+                },
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("❌ AI API Error Response:", errorText);
+            throw new Error(
+              `AI API request failed: ${response.status} - ${errorText}`
+            );
+          }
+
+          const data = await response.json();
+
+          if (
+            !data.candidates ||
+            !data.candidates[0] ||
+            !data.candidates[0].content
+          ) {
+            console.error("❌ Invalid AI response structure:", data);
+            throw new Error("Invalid AI response structure");
+          }
+
+          const aiResponse = data.candidates[0].content.parts[0].text;
+          console.log("🤖 Raw AI Response:", aiResponse);
+
+          // Clean the response and extract JSON
+          const cleanedResponse = aiResponse
+            .replace(/```json\s*|\s*```/g, "")
+            .trim();
+          const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+
+          if (!jsonMatch) {
+            console.error("❌ No JSON found in AI response:", cleanedResponse);
+            throw new Error("No valid JSON in AI response");
+          }
+
+          const result = JSON.parse(jsonMatch[0]);
+
+          // Validate required fields
+          if (
+            typeof result.matchScore !== "number" ||
+            typeof result.matchReasoning !== "string" ||
+            !Array.isArray(result.aiSuggestions)
+          ) {
+            throw new Error(
+              "Invalid AI response format - missing required fields"
+            );
+          }
+
+          console.log(`✅ REAL AI match score: ${result.matchScore}%`);
+          return result;
+        } catch (error) {
+          console.error("❌ REAL AI API Error:", error);
+          throw error; // Re-throw to skip this opportunity
+        }
       }
 
       function getFundingTypeBadge(opportunity) {
@@ -1533,48 +1723,54 @@
         aiMatchingHeader.style.display = "block";
 
         matchingStats.innerHTML = `
-          <div class="stat-item">
-            <div class="stat-value">${results.totalOpportunities}</div>
-            <div class="stat-label">Total Opportunities</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">${results.matchedCount}</div>
-            <div class="stat-label">Matches Found</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">${Math.round(
-              results.averageMatchScore
-            )}%</div>
-            <div class="stat-label">Avg Match Score</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">${Math.round(
-              (results.matchedCount / results.totalOpportunities) * 100
-            )}%</div>
-            <div class="stat-label">Match Rate</div>
-          </div>
-        `;
+      <div class="stat-item">
+        <div class="stat-value">${results.totalOpportunities}</div>
+        <div class="stat-label">Total Opportunities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">${results.matchedCount}</div>
+        <div class="stat-label">AI Matches Found</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">${Math.round(results.averageMatchScore)}%</div>
+        <div class="stat-label">Avg AI Match Score</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">${Math.round(
+          (results.matchedCount / results.totalOpportunities) * 100
+        )}%</div>
+        <div class="stat-label">AI Match Rate</div>
+      </div>
+    `;
       }
 
       function displayOpportunities(opportunities) {
-        console.log("🎯 Displaying opportunities:", opportunities.length);
+        console.log(
+          "🎯 Displaying REAL AI matched opportunities:",
+          opportunities.length
+        );
 
         if (opportunities.length === 0) {
-          console.log("❌ No opportunities to display");
+          console.log("❌ No REAL AI matches found");
           opportunitiesContainer.innerHTML = `
-            <div class="no-results">
-              <h3>No matching opportunities found</h3>
-              <p>We couldn't find funding opportunities that match your criteria. Try updating your business profile or check back later.</p>
-              <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                <a href="smme-profile.html" class="btn btn-primary">
-                  <i class="fas fa-edit"></i> Update Criteria
-                </a>
-                <a href="smme-dashboard.html" class="btn btn-secondary">
-                  <i class="fas fa-home"></i> Back to Dashboard
-                </a>
-              </div>
-            </div>
-          `;
+        <div class="no-results">
+          <h3>🤖 No AI Matches Found</h3>
+          <p>Our real AI analysis couldn't find strong matches for your business criteria. This could be because:</p>
+          <ul style="text-align: left; margin: 1rem 0;">
+            <li>Your business criteria are very specific</li>
+            <li>Current funding opportunities don't align with your profile</li>
+            <li>Try updating your business profile with broader criteria</li>
+          </ul>
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+            <a href="smme-profile.html" class="btn btn-primary">
+              <i class="fas fa-edit"></i> Update Business Criteria
+            </a>
+            <button class="btn btn-secondary" onclick="location.reload()">
+              <i class="fas fa-robot"></i> Retry AI Analysis
+            </button>
+          </div>
+        </div>
+      `;
           return;
         }
 
@@ -1585,133 +1781,121 @@
             const fundingIcon = getFundingTypeIcon(opp);
 
             return `
-              <div class="opportunity-card ${matchLevel.level}-match">
-                ${
-                  fundingBadge
-                    ? `
-                  <div class="opportunity-badge ${fundingBadge.class}">
-                    ${fundingBadge.label}
-                  </div>
-                `
-                    : ""
-                }
-                
-                <div class="opportunity-header">
-                  <div class="opportunity-title">
-                    <h3><i class="${fundingIcon}"></i> ${opp.name}</h3>
-                    <p>${opp.description || "No description available"}</p>
-                    <div class="funding-type-indicator">
-                      <i class="fas fa-tag"></i>
-                      ${getFundingTypeDescription(opp)}
-                    </div>
-                  </div>
-                  <div class="match-badge ${matchLevel.level}">
-                    ${opp.matchScore}% Match
-                  </div>
-                </div>
-
-                <div class="opportunity-details">
-                  ${
-                    opp.criteria?.funding_amount_min
-                      ? `
-                    <div class="detail-item">
-                      <strong>Funding Range</strong>
-                      <span>R${opp.criteria.funding_amount_min.toLocaleString()} - R${
-                          opp.criteria.funding_amount_max
-                            ? opp.criteria.funding_amount_max.toLocaleString()
-                            : "Open"
-                        }</span>
-                    </div>
-                  `
-                      : ""
-                  }
-                  
-                  ${
-                    opp.criteria?.sector
-                      ? `
-                    <div class="detail-item">
-                      <strong>Sector Focus</strong>
-                      <span>${
-                        opp.criteria.sector.charAt(0).toUpperCase() +
-                        opp.criteria.sector.slice(1)
-                      }</span>
-                    </div>
-                  `
-                      : ""
-                  }
-                  
-                  ${
-                    opp.criteria?.region
-                      ? `
-                    <div class="detail-item">
-                      <strong>Region Focus</strong>
-                      <span>${
-                        opp.criteria.region.charAt(0).toUpperCase() +
-                        opp.criteria.region.slice(1)
-                      }</span>
-                    </div>
-                  `
-                      : ""
-                  }
-                  
-                  ${
-                    opp.criteria?.business_stage
-                      ? `
-                    <div class="detail-item">
-                      <strong>Business Stage</strong>
-                      <span>${
-                        opp.criteria.business_stage.charAt(0).toUpperCase() +
-                        opp.criteria.business_stage.slice(1)
-                      }</span>
-                    </div>
-                  `
-                      : ""
-                  }
-                </div>
-
-                ${
-                  opp.criteria?.tags
-                    ? `
-                  <div class="criteria-tags">
-                    ${opp.criteria.tags
-                      .map((tag) => `<span class="criteria-tag">#${tag}</span>`)
-                      .join("")}
-                  </div>
-                `
-                    : ""
-                }
-
-                <div class="match-analysis">
-                  <h4><i class="fas fa-brain"></i> Match Analysis</h4>
-                  <div class="match-reasons">${opp.matchReasoning}</div>
-                </div>
-
-                <div class="ai-suggestions">
-                  <h4><i class="fas fa-lightbulb"></i> Application Tips</h4>
-                  <ul>
-                    ${opp.aiSuggestions
-                      .map(
-                        (suggestion) =>
-                          `<li><i class="fas fa-check"></i> ${suggestion}</li>`
-                      )
-                      .join("")}
-                  </ul>
-                </div>
-
-                <div class="opportunity-actions">
-                  <button class="btn btn-secondary" onclick="viewDetails('${
-                    opp.id
-                  }')">
-                    <i class="fas fa-info-circle"></i> View Details
-                  </button>
-                  <button class="btn btn-primary" onclick="applyForFunding('${
-                    opp.id
-                  }')">
-                    <i class="fas fa-paper-plane"></i> Apply Now
-                  </button>
-                </div>
+        <div class="opportunity-card ${matchLevel.level}-match">
+          ${
+            fundingBadge
+              ? `
+            <div class="opportunity-badge ${fundingBadge.class}">
+              ${fundingBadge.label}
+            </div>
+          `
+              : ""
+          }
+          
+          <div class="opportunity-header">
+            <div class="opportunity-title">
+              <h3><i class="${fundingIcon}"></i> ${opp.name}</h3>
+              <p>${opp.description || "No description available"}</p>
+              <div class="funding-type-indicator">
+                <i class="fas fa-tag"></i>
+                ${getFundingTypeDescription(opp)}
               </div>
-            `;
+            </div>
+            <div class="match-badge ${matchLevel.level}">
+              ${opp.matchScore}% AI Match
+            </div>
+          </div>
+
+          <div class="opportunity-details">
+            ${
+              opp.criteria?.funding_amount_min
+                ? `
+              <div class="detail-item">
+                <strong>Funding Range</strong>
+                <span>R${opp.criteria.funding_amount_min.toLocaleString()} - R${
+                    opp.criteria.funding_amount_max
+                      ? opp.criteria.funding_amount_max.toLocaleString()
+                      : "Open"
+                  }</span>
+              </div>
+            `
+                : ""
+            }
+            
+            ${
+              opp.criteria?.sector
+                ? `
+              <div class="detail-item">
+                <strong>Sector Focus</strong>
+                <span>${
+                  opp.criteria.sector.charAt(0).toUpperCase() +
+                  opp.criteria.sector.slice(1)
+                }</span>
+              </div>
+            `
+                : ""
+            }
+            
+            ${
+              opp.criteria?.region
+                ? `
+              <div class="detail-item">
+                <strong>Region Focus</strong>
+                <span>${
+                  opp.criteria.region.charAt(0).toUpperCase() +
+                  opp.criteria.region.slice(1)
+                }</span>
+              </div>
+            `
+                : ""
+            }
+            
+            ${
+              opp.criteria?.business_stage
+                ? `
+              <div class="detail-item">
+                <strong>Business Stage</strong>
+                <span>${
+                  opp.criteria.business_stage.charAt(0).toUpperCase() +
+                  opp.criteria.business_stage.slice(1)
+                }</span>
+              </div>
+            `
+                : ""
+            }
+          </div>
+
+          <div class="match-analysis">
+            <h4><i class="fas fa-robot"></i> REAL AI Analysis</h4>
+            <div class="match-reasons">${opp.matchReasoning}</div>
+          </div>
+
+          <div class="ai-suggestions">
+            <h4><i class="fas fa-lightbulb"></i> AI Application Strategy</h4>
+            <ul>
+              ${opp.aiSuggestions
+                .map(
+                  (suggestion) =>
+                    `<li><i class="fas fa-check"></i> ${suggestion}</li>`
+                )
+                .join("")}
+            </ul>
+          </div>
+
+          <div class="opportunity-actions">
+            <button class="btn btn-secondary" onclick="viewDetails('${
+              opp.id
+            }')">
+              <i class="fas fa-info-circle"></i> View Details
+            </button>
+            <button class="btn btn-primary" onclick="applyForFunding('${
+              opp.id
+            }')">
+              <i class="fas fa-paper-plane"></i> Apply Now
+            </button>
+          </div>
+        </div>
+      `;
           })
           .join("");
       }
@@ -1735,9 +1919,9 @@
       }
 
       function getMatchLevel(score) {
-        if (score >= 75) return { level: "high", label: "Perfect Match" };
-        if (score >= 50) return { level: "medium", label: "Strong Match" };
-        return { level: "low", label: "Good Match" };
+        if (score >= 75) return { level: "high", label: "Perfect AI Match" };
+        if (score >= 50) return { level: "medium", label: "Strong AI Match" };
+        return { level: "low", label: "Good AI Match" };
       }
 
       function viewDetails(opportunityId) {
@@ -1758,14 +1942,13 @@ Criteria:
 - Business Stage: ${criteria.business_stage || "Any"}
 
 Requirements: ${criteria.requirements || "None specified"}
-          `;
+      `;
           alert(details);
         }
       }
 
       // Initialize file upload with drag and drop
       function initializeFileUpload() {
-        // Drag and drop event handlers
         fileUploadArea.addEventListener("dragover", (e) => {
           e.preventDefault();
           fileUploadArea.classList.add("dragover");
@@ -1784,25 +1967,21 @@ Requirements: ${criteria.requirements || "None specified"}
         });
       }
 
-      // Handle file selection from input
       function handleFileSelect(event) {
         const files = event.target.files;
         handleFiles(files);
       }
 
-      // Process selected files
       function handleFiles(files) {
         const maxFiles = 5;
-        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        const maxSize = 10 * 1024 * 1024;
 
-        // Check file count
         if (uploadedFiles.length + files.length > maxFiles) {
           alert(`You can only upload up to ${maxFiles} files.`);
           return;
         }
 
         for (let file of files) {
-          // Check if file is PDF
           if (file.type !== "application/pdf") {
             alert(
               `"${file.name}" is not a PDF file. Please upload PDF files only.`
@@ -1810,22 +1989,18 @@ Requirements: ${criteria.requirements || "None specified"}
             continue;
           }
 
-          // Check file size
           if (file.size > maxSize) {
             alert(`"${file.name}" is too large. Maximum file size is 10MB.`);
             continue;
           }
 
-          // Add file to uploaded files
           uploadedFiles.push(file);
           addFileToList(file);
         }
 
-        // Reset file input
         fileInput.value = "";
       }
 
-      // Add file to the file list display
       function addFileToList(file) {
         const fileItem = document.createElement("div");
         fileItem.className = "file-item";
@@ -1833,38 +2008,34 @@ Requirements: ${criteria.requirements || "None specified"}
         const fileSize = (file.size / (1024 * 1024)).toFixed(2) + " MB";
 
         fileItem.innerHTML = `
-          <div class="file-info">
-            <i class="fas fa-file-pdf file-icon"></i>
-            <div>
-              <div class="file-name">${file.name}</div>
-              <div class="file-size">${fileSize}</div>
-            </div>
-          </div>
-          <button type="button" class="file-remove" onclick="removeFile('${file.name}')">
-            <i class="fas fa-times"></i>
-          </button>
-        `;
+      <div class="file-info">
+        <i class="fas fa-file-pdf file-icon"></i>
+        <div>
+          <div class="file-name">${file.name}</div>
+          <div class="file-size">${fileSize}</div>
+        </div>
+      </div>
+      <button type="button" class="file-remove" onclick="removeFile('${file.name}')">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
 
         fileList.appendChild(fileItem);
       }
 
-      // Remove file from uploaded files
       function removeFile(fileName) {
         uploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
-
-        // Rebuild file list
         fileList.innerHTML = "";
         uploadedFiles.forEach((file) => addFileToList(file));
       }
 
-      // Generate project summary using AI
       async function generateProjectSummary(opportunity) {
         projectSummaryText.innerHTML = `
-          <div class="loading">
-            <div class="spinner" style="width: 20px; height: 20px;"></div>
-            <p>AI is generating your project summary...</p>
-          </div>
-        `;
+  <div class="loading">
+    <div class="spinner" style="width: 20px; height: 20px;"></div>
+    <p>AI is generating your project summary...</p>
+  </div>
+`;
 
         try {
           const prompt = `
@@ -1888,51 +2059,46 @@ Write a professional project summary that:
 5. Is concise and compelling
 
 Focus on clarity, impact, and alignment with the funding criteria.
-          `;
+      `;
 
-          // Simulate API call (replace with actual Gemini API when working)
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Using the latest Gemini 2.0 Flash model
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: prompt,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
 
-          // Fallback template
-          const summary = `
-Project: Strategic Expansion Initiative for ${currentProfile.business_name}
-
-Objective: ${currentProfile.project_description}
-
-This project represents a strategic growth opportunity for ${currentProfile.business_name}, leveraging our ${currentProfile.years_in_operation} years of experience in the ${currentProfile.business_sector} sector. Based in ${currentProfile.region}, we have established a strong market presence and are now positioned for significant expansion.
-
-The funding will be utilized for ${currentProfile.fund_usage}, enabling us to scale operations, enhance service delivery, and create sustainable impact in our community. This initiative aligns perfectly with the ${opportunity.name} objectives, focusing on innovation, job creation, and economic development.
-
-Expected outcomes include increased operational capacity, market expansion, and enhanced service quality. With our proven track record and experienced team, we are confident in delivering measurable results that will benefit both our business and the broader community.
-
-This project represents a strategic investment in sustainable growth and regional economic development.
-          `.trim();
-
-          projectSummaryText.textContent = summary;
+          if (response.ok) {
+            const data = await response.json();
+            const summary = data.candidates[0].content.parts[0].text;
+            projectSummaryText.value = summary;
+          } else {
+            throw new Error("AI API failed");
+          }
         } catch (error) {
           console.error("Error generating project summary:", error);
-          const fallbackSummary = `
-Project Summary: ${currentProfile.project_description}
-
-${currentProfile.business_name} seeks funding to execute a strategic initiative focused on ${currentProfile.project_description}. With ${currentProfile.years_in_operation} years of experience in the ${currentProfile.business_sector} sector, we are well-positioned to successfully implement this project.
-
-The funding will support ${currentProfile.fund_usage}, driving growth and creating positive impact in the ${currentProfile.region} region. This project aligns with our long-term strategic goals and represents a significant opportunity for business expansion and community development.
-
-Our experienced team and proven business model ensure effective implementation and sustainable outcomes.
-          `.trim();
-
-          projectSummaryText.textContent = fallbackSummary;
+          projectSummaryText.textContent =
+            "AI content generation failed. Please write your project summary manually.";
         }
       }
 
-      // Generate motivation letter using AI
       async function generateMotivationLetter(opportunity) {
-        motivationText.innerHTML = `
-          <div class="loading">
-            <div class="spinner" style="width: 20px; height: 20px;"></div>
-            <p>AI is generating your motivation letter...</p>
-          </div>
-        `;
+        motivationText.value = "AI is generating your motivation letter...";
 
         try {
           const prompt = `
@@ -1956,63 +2122,44 @@ Write a compelling 250-300 word motivation letter that:
 5. Shows commitment and capability
 
 Use professional tone and focus on creating sustainable impact.
-          `;
+      `;
 
-          // Simulate API call (replace with actual Gemini API when working)
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Using the latest Gemini 2.0 Flash model
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: prompt,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
 
-          // Fallback template
-          const letter = `
-Dear Funding Committee,
-
-I am writing to express our strong interest in the ${
-            opportunity.name
-          } on behalf of ${currentProfile.business_name}. As a established ${
-            currentProfile.business_sector
-          } business operating in ${currentProfile.region} for ${
-            currentProfile.years_in_operation
-          } years, we have developed the expertise and track record necessary for successful project implementation.
-
-Our proposed initiative focuses on ${
-            currentProfile.project_description
-          }, which aligns perfectly with your funding objectives. This project represents a strategic opportunity for growth and impact, leveraging our ${
-            currentProfile.years_in_operation
-          } years of industry experience and market knowledge.
-
-The requested funding will be allocated to ${
-            currentProfile.fund_usage
-          }, enabling us to scale operations, enhance service delivery, and create meaningful employment opportunities. We are committed to transparency, accountability, and sustainable business practices.
-
-Our team's dedication and proven business model position us for successful project execution. We have carefully planned this initiative to ensure maximum impact and sustainable outcomes that benefit both our business and the broader community.
-
-We are excited about the potential partnership and confident that our project aligns with your funding criteria. Thank you for considering our application.
-
-Sincerely,
-${currentProfile.owner_name || "Management Team"}
-${currentProfile.business_name}
-          `.trim();
-
-          motivationText.textContent = letter;
+          if (response.ok) {
+            const data = await response.json();
+            const letter = data.candidates[0].content.parts[0].text;
+            motivationText.value = letter;
+          } else {
+            throw new Error("AI API failed");
+          }
         } catch (error) {
           console.error("Error generating motivation letter:", error);
-          const fallbackLetter = `
-Dear Selection Committee,
-
-${currentProfile.business_name} is pleased to apply for the ${opportunity.name} funding opportunity. Our ${currentProfile.years_in_operation} years in the ${currentProfile.business_sector} sector have prepared us for this strategic expansion.
-
-Our project, "${currentProfile.project_description}", will utilize funding for ${currentProfile.fund_usage}. We are confident in our ability to deliver exceptional results and create positive impact.
-
-Thank you for your consideration.
-
-Sincerely,
-${currentProfile.business_name}
-          `.trim();
-
-          motivationText.textContent = fallbackLetter;
+          motivationText.textContent =
+            "AI content generation failed. Please write your motivation letter manually.";
         }
       }
 
-      // Regenerate functions
       async function regenerateProjectSummary() {
         if (currentFundingOpportunity) {
           await generateProjectSummary(currentFundingOpportunity);
@@ -2025,7 +2172,6 @@ ${currentProfile.business_name}
         }
       }
 
-      // Apply for funding function
       async function applyForFunding(opportunityId) {
         console.log("📝 Applying for funding:", opportunityId);
 
@@ -2039,38 +2185,33 @@ ${currentProfile.business_name}
 
         currentFundingOpportunity = opportunity;
 
-        // Load funder information
         const { data: funder } = await supabase
           .from("users")
           .select("email")
           .eq("id", opportunity.funder_id)
           .single();
 
-        // Update modal content
         modalTitle.textContent = `Apply for: ${opportunity.name}`;
         applicationInfo.innerHTML = `
-          <h3>${opportunity.name}</h3>
-          <p><strong>Funder:</strong> ${funder?.email || "Unknown"}</p>
-          <p><strong>Description:</strong> ${
-            opportunity.description || "No description available"
-          }</p>
-          ${
-            opportunity.criteria?.amount_range
-              ? `<p><strong>Funding Range:</strong> ${opportunity.criteria.amount_range}</p>`
-              : ""
-          }
-        `;
+      <h3>${opportunity.name}</h3>
+      <p><strong>Funder:</strong> ${funder?.email || "Unknown"}</p>
+      <p><strong>Description:</strong> ${
+        opportunity.description || "No description available"
+      }</p>
+      ${
+        opportunity.criteria?.amount_range
+          ? `<p><strong>Funding Range:</strong> ${opportunity.criteria.amount_range}</p>`
+          : ""
+      }
+    `;
 
-        // Reset form and files
         applicationForm.reset();
         uploadedFiles = [];
         fileList.innerHTML = "";
 
-        // Generate AI content
         await generateProjectSummary(opportunity);
         await generateMotivationLetter(opportunity);
 
-        // Show modal
         applicationModal.classList.add("active");
       }
 
@@ -2081,7 +2222,6 @@ ${currentProfile.business_name}
         fileList.innerHTML = "";
       }
 
-      // Handle form submission
       applicationForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -2093,8 +2233,8 @@ ${currentProfile.business_name}
         const formData = new FormData(applicationForm);
         const applicationData = {
           requestedAmount: formData.get("requestedAmount"),
-          projectSummary: projectSummaryText.textContent,
-          motivationLetter: motivationText.textContent,
+          projectSummary: projectSummaryText.value,
+          motivationLetter: motivationText.value,
           termsAccepted: formData.get("termsAccepted") === "on",
           uploadedFiles: uploadedFiles.map((file) => ({
             name: file.name,
@@ -2103,7 +2243,6 @@ ${currentProfile.business_name}
           })),
         };
 
-        // Validate form
         if (
           !applicationData.requestedAmount ||
           !applicationData.termsAccepted
@@ -2115,7 +2254,6 @@ ${currentProfile.business_name}
         }
 
         try {
-          // Create application record
           const applicationRecord = {
             smme_id: currentUser.id,
             funder_id: currentFundingOpportunity.funder_id,
@@ -2144,7 +2282,6 @@ ${currentProfile.business_name}
             "🎉 Application submitted successfully!\n\nYour application has been sent to the funder for review. You can track its progress in the 'My Applications' section."
           );
 
-          // Close modal and redirect to applications page
           closeApplicationModal();
           setTimeout(() => {
             window.location.href = "smme-applications.html";
@@ -2161,12 +2298,21 @@ ${currentProfile.business_name}
         window.location.href = "login.html";
       }
 
-      // Close modal when clicking outside
       window.onclick = function (event) {
         if (event.target === applicationModal) {
           closeApplicationModal();
         }
       };
+
+      // Make functions globally available
+      window.viewDetails = viewDetails;
+      window.applyForFunding = applyForFunding;
+      window.regenerateProjectSummary = regenerateProjectSummary;
+      window.regenerateMotivation = regenerateMotivation;
+      window.removeFile = removeFile;
+      window.handleFileSelect = handleFileSelect;
+      window.closeApplicationModal = closeApplicationModal;
+      window.logout = logout;
     </script>
   </body>
 </html>

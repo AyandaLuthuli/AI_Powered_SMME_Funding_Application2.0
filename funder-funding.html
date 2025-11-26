@@ -442,10 +442,12 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
       // ---------------------------
-      // Configuration
+      // Configuration & Imports
       // ---------------------------
+      import { createFunding } from "./createFunding.js";
+
       const SUPABASE_URL = "https://ovvvwbtexnbxzacizokr.supabase.co";
       const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92dnZ3YnRleG5ieHphY2l6b2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODQ5OTEsImV4cCI6MjA3OTE2MDk5MX0.Ii21cw1Iyops8Zo784P-25NKz2m-TCyJ2zWwI4V1kcE";
@@ -547,76 +549,76 @@
       function displayFunding(list) {
         if (!list || list.length === 0) {
           fundingTable.innerHTML = `
-            <div class="no-data">
-              <p>No funding opportunities found.</p>
-              <button class="btn btn-primary" onclick="openCreateFundingModal()"><i class="fas fa-plus"></i> Create Your First Funding Opportunity</button>
-            </div>`;
+        <div class="no-data">
+          <p>No funding opportunities found.</p>
+          <button class="btn btn-primary" onclick="openCreateFundingModal()"><i class="fas fa-plus"></i> Create Your First Funding Opportunity</button>
+        </div>`;
           return;
         }
 
         fundingTable.innerHTML = `
-          <table class="data-table">
-            <thead>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Funding Opportunity</th>
+            <th>Criteria</th>
+            <th>Applications</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list
+            .map((opp) => {
+              const c = opp.criteria || {};
+              const description = (opp.description || "").substring(0, 60);
+              return `
               <tr>
-                <th>Funding Opportunity</th>
-                <th>Criteria</th>
-                <th>Applications</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${list
-                .map((opp) => {
-                  const c = opp.criteria || {};
-                  const description = (opp.description || "").substring(0, 60);
-                  return `
-                  <tr>
-                    <td>
-                      <div style="font-weight:600">${escapeHtml(opp.name)}</div>
-                      <div style="font-size:0.8rem;color:#666">${escapeHtml(
-                        description
-                      )}${
-                    opp.description && opp.description.length > 60 ? "..." : ""
+                <td>
+                  <div style="font-weight:600">${escapeHtml(opp.name)}</div>
+                  <div style="font-size:0.8rem;color:#666">${escapeHtml(
+                    description
+                  )}${
+                opp.description && opp.description.length > 60 ? "..." : ""
+              }</div>
+                </td>
+                <td>
+                  <div style="font-weight:500">${escapeHtml(
+                    c.sector || "General"
+                  )}</div>
+                  <div class="criteria-tags" style="margin-top:.5rem">
+                    <span class="criteria-tag">${escapeHtml(
+                      c.region || "National"
+                    )}</span>
+                    <span class="criteria-tag">${escapeHtml(
+                      c.amount_range || "Flexible"
+                    )}</span>
+                  </div>
+                </td>
+                <td>
+                  <div style="font-weight:600;color:var(--primary)">${
+                    Math.floor(Math.random() * 20) + 5
                   }</div>
-                    </td>
-                    <td>
-                      <div style="font-weight:500">${escapeHtml(
-                        c.sector || "General"
-                      )}</div>
-                      <div class="criteria-tags" style="margin-top:.5rem">
-                        <span class="criteria-tag">${escapeHtml(
-                          c.region || "National"
-                        )}</span>
-                        <span class="criteria-tag">${escapeHtml(
-                          c.amount_range || "Flexible"
-                        )}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div style="font-weight:600;color:var(--primary)">${
-                        Math.floor(Math.random() * 20) + 5
-                      }</div>
-                      <div style="font-size:0.8rem;color:#666">applications</div>
-                    </td>
-                    <td>${new Date(opp.created_at).toLocaleDateString()}</td>
-                    <td>
-                      <div style="display:flex;gap:.5rem">
-                        <button class="btn btn-secondary" onclick="viewFundingDetails('${
-                          opp.id
-                        }')"><i class="fas fa-eye"></i> View</button>
-                        <button class="btn btn-danger" onclick="deleteFunding('${
-                          opp.id
-                        }')"><i class="fas fa-trash"></i> Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-                })
-                .join("")}
-            </tbody>
-          </table>
-        `;
+                  <div style="font-size:0.8rem;color:#666">applications</div>
+                </td>
+                <td>${new Date(opp.created_at).toLocaleDateString()}</td>
+                <td>
+                  <div style="display:flex;gap:.5rem">
+                    <button class="btn btn-secondary" onclick="viewFundingDetails('${
+                      opp.id
+                    }')"><i class="fas fa-eye"></i> View</button>
+                    <button class="btn btn-danger" onclick="deleteFunding('${
+                      opp.id
+                    }')"><i class="fas fa-trash"></i> Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    `;
       }
 
       function displayFundingAll(list) {
@@ -687,7 +689,69 @@
       }
 
       // ---------------------------
-      // Create Funding (insert into DB)
+      // Create Funding with embedded function
+      // ---------------------------
+      document
+        .getElementById("createFundingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!currentFunder) {
+            alert("Error: No funder logged in.");
+            return;
+          }
+
+          const name = document.getElementById("fundingName").value.trim();
+          const description = document
+            .getElementById("fundingDescription")
+            .value.trim();
+          const region = document.getElementById("fundingRegion").value;
+          const sector = document.getElementById("fundingSector").value;
+          const amountRange = document.getElementById("amountRange").value;
+          const requirements = document
+            .getElementById("requirements")
+            .value.trim();
+          const deadline = document.getElementById("deadline").value || null;
+
+          const criteria = {
+            region,
+            sector,
+            amount_range: amountRange,
+            requirements,
+            ...(deadline && { deadline }),
+          };
+
+          try {
+            // Call reusable createFunding function
+            const result = await createFunding({
+              funder_id: currentFunder.id,
+              name,
+              description,
+              criteria,
+            });
+
+            if (!result.success) {
+              console.error(result.error);
+              alert("Failed to create funding. Check console for details.");
+              return;
+            }
+
+            alert("Funding opportunity created successfully!");
+
+            // Reset modal & refresh table
+            document.getElementById("createFundingForm").reset();
+            closeCreateFundingModal();
+
+            // Reload funding table
+            await loadFunderFunding();
+          } catch (err) {
+            console.error("Unexpected error:", err);
+            alert("Something went wrong. Check console for details.");
+          }
+        });
+
+      // ---------------------------
+      // Modal Functions
       // ---------------------------
       function openCreateFundingModal() {
         document.getElementById("createFundingModal").classList.add("active");
@@ -699,72 +763,6 @@
           .classList.remove("active");
         document.getElementById("createFundingForm").reset();
       }
-
-      document
-        .getElementById("createFundingForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          if (!currentFunder) {
-            alert("Funder not identified");
-            return;
-          }
-
-          const name = document.getElementById("fundingName").value.trim();
-          const description = document
-            .getElementById("fundingDescription")
-            .value.trim();
-          const region = document.getElementById("fundingRegion").value;
-          const sector = document.getElementById("fundingSector").value;
-          const amount_range = document.getElementById("amountRange").value;
-          const requirements = document
-            .getElementById("requirements")
-            .value.trim();
-          const deadline = document.getElementById("deadline").value || null;
-
-          // build criteria JSON (keeps your previously used structure)
-          const criteria = {
-            region,
-            sector,
-            amount_range,
-            requirements,
-            match_reasons: [],
-          };
-          if (deadline) criteria.deadline = deadline;
-
-          const record = {
-            funder_id: currentFunder.id,
-            name,
-            description,
-            criteria,
-          };
-
-          try {
-            const { data, error } = await supabase
-              .from("funding")
-              .insert([record])
-              .select(); // request the inserted row back
-
-            if (error) throw error;
-            const inserted = data && data[0] ? data[0] : null;
-            if (inserted) {
-              funderFunding.unshift(inserted);
-              displayFunding(funderFunding);
-              displayFundingAll(funderFunding);
-              closeCreateFundingModal();
-              alert("Funding opportunity created successfully!");
-            } else {
-              // If select() returned nothing (rare), reload list
-              await loadFunderFunding();
-              closeCreateFundingModal();
-              alert("Funding opportunity created (refreshing).");
-            }
-          } catch (err) {
-            console.error("Error creating funding opportunity:", err);
-            alert(
-              "Error creating funding opportunity. See console for details."
-            );
-          }
-        });
 
       // ---------------------------
       // View / Delete helpers
@@ -787,7 +785,7 @@ Criteria:
  - Requirements: ${c.requirements || "None specified"}
 
 Created: ${new Date(f.created_at).toLocaleString()}
-        `;
+    `;
         alert(details);
       }
 
@@ -831,6 +829,15 @@ Created: ${new Date(f.created_at).toLocaleString()}
         localStorage.removeItem("fundfinder_user");
         window.location.href = "index.html";
       }
+
+      // Make functions globally available for onclick handlers
+      window.openCreateFundingModal = openCreateFundingModal;
+      window.closeCreateFundingModal = closeCreateFundingModal;
+      window.viewFundingDetails = viewFundingDetails;
+      window.deleteFunding = deleteFunding;
+      window.switchTab = switchTab;
+      window.filterFunding = filterFunding;
+      window.logout = logout;
     </script>
   </body>
 </html>
