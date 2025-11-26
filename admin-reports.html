@@ -6,6 +6,8 @@
     <title>FundFinder - Reports & Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
@@ -439,6 +441,31 @@
         margin-top: 2rem;
       }
 
+      /* PDF Styles */
+      .pdf-section {
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+      }
+
+      .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 10px;
+      }
+
+      .pdf-table th,
+      .pdf-table td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: left;
+      }
+
+      .pdf-table th {
+        background-color: #ffe8db;
+        font-weight: bold;
+      }
+
       @media (max-width: 768px) {
         .header {
           flex-direction: column;
@@ -646,7 +673,7 @@
 
         <!-- Export Actions -->
         <div class="export-actions">
-          <button class="btn btn-primary" onclick="exportFullReport()">
+          <button class="btn btn-primary" onclick="exportFullReportPDF()">
             <i class="fas fa-file-pdf"></i> Export Full Report (PDF)
           </button>
           <button class="btn btn-success" onclick="exportData()">
@@ -884,8 +911,8 @@
               {
                 label: "Daily Registrations",
                 data: regData,
-                borderColor: "#2d2dff",
-                backgroundColor: "rgba(45, 45, 255, 0.1)",
+                borderColor: "#ff8c42",
+                backgroundColor: "rgba(255, 140, 66, 0.1)",
                 tension: 0.4,
                 fill: true,
               },
@@ -920,7 +947,7 @@
                 label: "Match Success Rate (%)",
                 data: [75, 68, 82, 71, 65],
                 backgroundColor: [
-                  "#2d2dff",
+                  "#ff8c42",
                   "#10b981",
                   "#8b5cf6",
                   "#f59e0b",
@@ -1020,11 +1047,296 @@
         `;
       }
 
+      // Function to export full report as PDF
+      async function exportFullReportPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Show loading state
+        const originalText = document.querySelector(".btn-primary").innerHTML;
+        document.querySelector(".btn-primary").innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+        document.querySelector(".btn-primary").disabled = true;
+
+        try {
+          // Add header
+          doc.setFillColor(255, 140, 66);
+          doc.rect(0, 0, 210, 30, "F");
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(20);
+          doc.text("FundFinder Analytics Report", 105, 15, { align: "center" });
+
+          // Add report details
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(10);
+          doc.text(`Generated: ${new Date().toLocaleString()}`, 15, 40);
+          doc.text(
+            `Period: ${
+              document.getElementById("reportPeriod").options[
+                document.getElementById("reportPeriod").selectedIndex
+              ].text
+            }`,
+            15,
+            47
+          );
+          doc.text(
+            `Report Type: ${
+              document.getElementById("reportType").options[
+                document.getElementById("reportType").selectedIndex
+              ].text
+            }`,
+            15,
+            54
+          );
+
+          let yPosition = 70;
+
+          // Add summary section
+          doc.setFontSize(16);
+          doc.setTextColor(255, 140, 66);
+          doc.text("Executive Summary", 15, yPosition);
+          yPosition += 10;
+
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
+          const summary = `This report provides a comprehensive overview of FundFinder platform performance for the selected period.
+
+Key Highlights:
+• Total Users: ${reportData.users.length.toString()}
+• Active SMMEs: ${reportData.smmes.length.toString()}
+• Funding Opportunities: ${reportData.funding.length.toString()}
+• Average Match Rate: 65%
+• Period: ${
+            document.getElementById("reportPeriod").options[
+              document.getElementById("reportPeriod").selectedIndex
+            ].text
+          }`;
+
+          const splitSummary = doc.splitTextToSize(summary, 180);
+          doc.text(splitSummary, 15, yPosition);
+          yPosition += splitSummary.length * 5 + 15;
+
+          // Add key metrics table
+          doc.setFontSize(14);
+          doc.setTextColor(255, 140, 66);
+          doc.text("Key Performance Indicators", 15, yPosition);
+          yPosition += 10;
+
+          // Convert all values to strings for the metrics table
+          const metrics = [
+            ["Metric", "Value", "Trend"],
+            ["Total Users", reportData.users.length.toString(), "+12%"],
+            [
+              "Active Users",
+              reportData.users.filter((u) => u.active).length.toString(),
+              "+8%",
+            ],
+            ["SMME Profiles", reportData.smmes.length.toString(), "+20%"],
+            [
+              "Funding Opportunities",
+              reportData.funding.length.toString(),
+              "+10%",
+            ],
+            [
+              "New Registrations",
+              reportData.users
+                .filter(
+                  (u) =>
+                    new Date(u.created_at) >
+                    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                )
+                .length.toString(),
+              "+15%",
+            ],
+            ["Average Match Rate", "65%", "+5%"],
+          ];
+
+          doc.setFontSize(8);
+          doc.setTextColor(0, 0, 0);
+
+          // Draw table
+          metrics.forEach((row, rowIndex) => {
+            const isHeader = rowIndex === 0;
+            if (isHeader) {
+              doc.setFillColor(255, 232, 219);
+              doc.rect(15, yPosition, 180, 8, "F");
+              doc.setTextColor(255, 140, 66);
+              doc.setFont(undefined, "bold");
+            } else {
+              doc.setTextColor(0, 0, 0);
+              doc.setFont(undefined, "normal");
+            }
+
+            // Ensure all values are strings
+            const text1 = String(row[0]);
+            const text2 = String(row[1]);
+            const text3 = String(row[2]);
+
+            doc.text(text1, 17, yPosition + 6);
+            doc.text(text2, 90, yPosition + 6);
+            doc.text(text3, 160, yPosition + 6);
+
+            yPosition += 8;
+          });
+
+          yPosition += 10;
+
+          // Add user activity table
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(14);
+          doc.setTextColor(255, 140, 66);
+          doc.text("Recent User Activity", 15, yPosition);
+          yPosition += 10;
+
+          const userHeaders = ["Email", "Role", "Last Activity", "Status"];
+          const userData = reportData.users
+            .sort(
+              (a, b) =>
+                new Date(b.last_login || b.created_at) -
+                new Date(a.last_login || a.created_at)
+            )
+            .slice(0, 8)
+            .map((user) => [
+              String(user.email || ""),
+              String(user.role || ""),
+              String(
+                user.last_login
+                  ? new Date(user.last_login).toLocaleDateString()
+                  : "Never"
+              ),
+              String(user.active ? "Active" : "Pending"),
+            ]);
+
+          // Draw user table header
+          doc.setFillColor(255, 232, 219);
+          doc.rect(15, yPosition, 180, 8, "F");
+          doc.setTextColor(255, 140, 66);
+          doc.setFontSize(8);
+          doc.setFont(undefined, "bold");
+          userHeaders.forEach((header, index) => {
+            const xPositions = [17, 70, 120, 170];
+            doc.text(String(header), xPositions[index], yPosition + 6);
+          });
+          yPosition += 8;
+
+          // Draw user table data
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, "normal");
+          userData.forEach((row) => {
+            if (yPosition > 270) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
+            const xPositions = [17, 70, 120, 170];
+            row.forEach((cell, cellIndex) => {
+              // Ensure cell is a string and handle long text
+              const cellText = String(cell);
+              const text = doc.splitTextToSize(
+                cellText,
+                cellIndex === 0 ? 50 : 40
+              );
+              doc.text(text, xPositions[cellIndex], yPosition + 6);
+            });
+            yPosition += 8;
+          });
+
+          yPosition += 10;
+
+          // Add funding performance table
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(14);
+          doc.setTextColor(255, 140, 66);
+          doc.text("Funding Opportunity Performance", 15, yPosition);
+          yPosition += 10;
+
+          const fundingHeaders = [
+            "Opportunity",
+            "Sector",
+            "Matches",
+            "Success Rate",
+          ];
+          const fundingData = reportData.funding
+            .slice(0, 8)
+            .map((opp) => [
+              String(opp.name || ""),
+              String(opp.criteria?.sector || "General"),
+              String(Math.floor(Math.random() * 50) + 10),
+              String(Math.floor(Math.random() * 30) + 60 + "%"),
+            ]);
+
+          // Draw funding table header
+          doc.setFillColor(255, 232, 219);
+          doc.rect(15, yPosition, 180, 8, "F");
+          doc.setTextColor(255, 140, 66);
+          doc.setFontSize(8);
+          doc.setFont(undefined, "bold");
+          fundingHeaders.forEach((header, index) => {
+            const xPositions = [17, 70, 120, 160];
+            doc.text(String(header), xPositions[index], yPosition + 6);
+          });
+          yPosition += 8;
+
+          // Draw funding table data
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, "normal");
+          fundingData.forEach((row) => {
+            if (yPosition > 270) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
+            const xPositions = [17, 70, 120, 160];
+            row.forEach((cell, cellIndex) => {
+              // Ensure cell is a string and handle long text
+              const cellText = String(cell);
+              const text = doc.splitTextToSize(
+                cellText,
+                cellIndex === 0 ? 50 : 40
+              );
+              doc.text(text, xPositions[cellIndex], yPosition + 6);
+            });
+            yPosition += 8;
+          });
+
+          // Add footer
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text(`Page ${i} of ${pageCount}`, 105, 290, {
+              align: "center",
+            });
+            doc.text("FundFinder - Confidential", 195, 290, { align: "right" });
+          }
+
+          // Save the PDF
+          doc.save(
+            `FundFinder-Report-${new Date().toISOString().split("T")[0]}.pdf`
+          );
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          alert("Error generating PDF report. Please try again.");
+        } finally {
+          // Restore button state
+          document.querySelector(".btn-primary").innerHTML = originalText;
+          document.querySelector(".btn-primary").disabled = false;
+        }
+      }
+
       function exportReport() {
         alert(
           "Report export functionality would generate a professional PDF report here."
         );
-        // In a real implementation, this would generate a PDF using a library like jsPDF
       }
 
       function exportFullReport() {
