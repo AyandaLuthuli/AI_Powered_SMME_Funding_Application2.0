@@ -14,6 +14,28 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* CSS Variables for Orange Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #ff8c42; /* Softer orange */
+        --color-orange-medium: #ffa366;
+        --color-orange-light: #ffc8a8;
+        --color-orange-very-light: #ffe8db;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -21,30 +43,31 @@
       }
 
       body {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-body);
         line-height: 1.6;
-        color: #333;
-        background: #f5f7fa;
+        color: var(--color-dark);
+        background: var(--color-gray-light);
       }
 
       /* Header */
       .header {
-        background: #fff;
+        background: var(--color-white);
         padding: 1rem 2rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 2px solid var(--color-orange);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
       }
 
       .logo {
         font-weight: 700;
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: var(--font-heading);
       }
 
       .nav-links {
@@ -54,18 +77,29 @@
       }
 
       .nav-links a {
-        color: #333;
+        color: var(--color-dark);
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
         padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        position: relative;
       }
 
       .nav-links a:hover,
       .nav-links a.active {
-        background: #2d2dff;
-        color: white;
+        color: var(--color-orange);
+      }
+
+      .nav-links a.active::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 1rem;
+        right: 1rem;
+        height: 3px;
+        background: var(--color-orange);
+        border-radius: var(--border-radius-sm);
       }
 
       .user-menu {
@@ -84,7 +118,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
         display: flex;
         align-items: center;
@@ -103,7 +137,7 @@
 
       .user-role {
         font-size: 0.8rem;
-        color: #666;
+        color: var(--color-gray);
       }
 
       .logout-btn {
@@ -111,10 +145,13 @@
         color: white;
         border: none;
         padding: 0.6rem 1.2rem;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .logout-btn:hover {
@@ -132,18 +169,19 @@
       .access-denied {
         text-align: center;
         padding: 4rem 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: var(--color-white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
       }
 
       .access-denied h2 {
         color: #dc2626;
         margin-bottom: 1rem;
+        font-family: var(--font-heading);
       }
 
       .access-denied p {
-        color: #666;
+        color: var(--color-gray);
         margin-bottom: 2rem;
       }
 
@@ -155,20 +193,22 @@
       }
 
       .page-header h1 {
-        color: #2d2dff;
+        color: var(--color-orange);
         font-size: 2.5rem;
+        font-family: var(--font-heading);
       }
 
       /* Filters */
       .filters {
-        background: #fff;
+        background: var(--color-white);
         padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
         margin-bottom: 2rem;
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
+        border-left: 4px solid var(--color-orange);
       }
 
       .filter-group {
@@ -179,49 +219,62 @@
 
       .filter-group label {
         font-weight: 600;
-        color: #444;
+        color: var(--color-dark);
         font-size: 0.9rem;
       }
 
       select,
       input {
         padding: 0.75rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        background: #fafafa;
+        border: 2px solid var(--color-gray-border);
+        border-radius: var(--border-radius-md);
+        background: var(--color-gray-light);
         font-size: 0.9rem;
+        font-family: var(--font-body);
+        transition: var(--transition);
+      }
+
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--color-orange);
+        background: var(--color-white);
+        box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
       }
 
       .btn {
         padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: var(--font-body);
       }
 
       .btn-primary {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
       }
 
       .btn-primary:hover {
-        background: #1a1aff;
+        background: var(--color-orange-medium);
         transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
       }
 
       .btn-secondary {
-        background: #6b7280;
+        background: var(--color-gray);
         color: white;
       }
 
       .btn-secondary:hover {
-        background: #4b5563;
+        background: #5a6268;
+        transform: translateY(-2px);
       }
 
       .btn-success {
@@ -231,6 +284,7 @@
 
       .btn-success:hover {
         background: #059669;
+        transform: translateY(-2px);
       }
 
       .btn-danger {
@@ -240,6 +294,7 @@
 
       .btn-danger:hover {
         background: #dc2626;
+        transform: translateY(-2px);
       }
 
       .btn-small {
@@ -249,22 +304,29 @@
 
       /* Users Table */
       .users-table-container {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: var(--color-white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
         overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .users-table-container:hover {
+        box-shadow: var(--shadow-lg);
       }
 
       .table-header {
         padding: 1.5rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-gray-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background: var(--color-orange-very-light);
       }
 
       .table-header h3 {
-        color: #333;
+        color: var(--color-dark);
+        font-family: var(--font-heading);
       }
 
       .users-table {
@@ -276,17 +338,18 @@
       .users-table td {
         padding: 1rem;
         text-align: left;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-gray-border);
       }
 
       .users-table th {
-        background: #f8f9fa;
+        background: var(--color-orange-very-light);
         font-weight: 600;
-        color: #333;
+        color: var(--color-orange);
+        font-family: var(--font-heading);
       }
 
       .users-table tr:hover {
-        background: #f8f9fa;
+        background: var(--color-gray-light);
       }
 
       .status-badge {
@@ -316,8 +379,8 @@
         border-radius: 15px;
         font-size: 0.8rem;
         font-weight: 600;
-        background: #e0e7ff;
-        color: #3730a3;
+        background: var(--color-orange-very-light);
+        color: var(--color-orange);
       }
 
       .actions {
@@ -332,7 +395,7 @@
 
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #2d2dff;
+        border-left-color: var(--color-orange);
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -349,7 +412,13 @@
       .no-data {
         text-align: center;
         padding: 3rem;
-        color: #666;
+        color: var(--color-gray);
+      }
+
+      .no-data h3 {
+        color: var(--color-dark);
+        margin-bottom: 1rem;
+        font-family: var(--font-heading);
       }
 
       @media (max-width: 768px) {
@@ -379,6 +448,54 @@
         .users-table {
           display: block;
           overflow-x: auto;
+        }
+
+        .page-header {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .table-header {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .actions {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .btn {
+          padding: 0.875rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .users-table th,
+        .users-table td {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.8rem;
+        }
+
+        .status-badge,
+        .role-badge {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.5rem;
+        }
+
+        .filters {
+          padding: 1rem;
+        }
+
+        .filter-group {
+          width: 100%;
         }
       }
     </style>

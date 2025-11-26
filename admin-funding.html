@@ -6,7 +6,7 @@
     <title>FundFinder - Funding Management</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Black&display=swap"
       rel="stylesheet"
     />
     <link
@@ -14,6 +14,28 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* CSS Variables for Orange Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #ff8c42; /* Softer orange */
+        --color-orange-medium: #ffa366;
+        --color-orange-light: #ffc8a8;
+        --color-orange-very-light: #ffe8db;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -21,30 +43,31 @@
       }
 
       body {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-body);
         line-height: 1.6;
-        color: #333;
-        background: #f5f7fa;
+        color: var(--color-dark);
+        background: var(--color-gray-light);
       }
 
       /* Header */
       .header {
-        background: #fff;
+        background: var(--color-white);
         padding: 1rem 2rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 2px solid var(--color-orange);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
       }
 
       .logo {
         font-weight: 700;
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: var(--font-heading);
       }
 
       .nav-links {
@@ -54,18 +77,29 @@
       }
 
       .nav-links a {
-        color: #333;
+        color: var(--color-dark);
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
         padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        position: relative;
       }
 
       .nav-links a:hover,
       .nav-links a.active {
-        background: #2d2dff;
-        color: white;
+        color: var(--color-orange);
+      }
+
+      .nav-links a.active::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 1rem;
+        right: 1rem;
+        height: 3px;
+        background: var(--color-orange);
+        border-radius: var(--border-radius-sm);
       }
 
       .user-menu {
@@ -84,7 +118,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
         display: flex;
         align-items: center;
@@ -103,7 +137,7 @@
 
       .user-role {
         font-size: 0.8rem;
-        color: #666;
+        color: var(--color-gray);
       }
 
       .logout-btn {
@@ -111,10 +145,13 @@
         color: white;
         border: none;
         padding: 0.6rem 1.2rem;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .logout-btn:hover {
@@ -132,18 +169,19 @@
       .access-denied {
         text-align: center;
         padding: 4rem 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: var(--color-white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
       }
 
       .access-denied h2 {
         color: #dc2626;
         margin-bottom: 1rem;
+        font-family: var(--font-heading);
       }
 
       .access-denied p {
-        color: #666;
+        color: var(--color-gray);
         margin-bottom: 2rem;
       }
 
@@ -155,72 +193,9 @@
       }
 
       .page-header h1 {
-        color: #2d2dff;
+        color: var(--color-orange);
         font-size: 2.5rem;
-      }
-
-      .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .btn-primary {
-        background: #2d2dff;
-        color: white;
-      }
-
-      .btn-primary:hover {
-        background: #1a1aff;
-        transform: translateY(-2px);
-      }
-
-      .btn-secondary {
-        background: #6b7280;
-        color: white;
-      }
-
-      .btn-secondary:hover {
-        background: #4b5563;
-      }
-
-      .btn-success {
-        background: #10b981;
-        color: white;
-      }
-
-      .btn-success:hover {
-        background: #059669;
-      }
-
-      .btn-danger {
-        background: #ef4444;
-        color: white;
-      }
-
-      .btn-danger:hover {
-        background: #dc2626;
-      }
-
-      .btn-warning {
-        background: #f59e0b;
-        color: white;
-      }
-
-      .btn-warning:hover {
-        background: #d97706;
-      }
-
-      .btn-small {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        font-family: var(--font-heading);
       }
 
       /* Funding Overview Cards */
@@ -232,21 +207,28 @@
       }
 
       .overview-card {
-        background: #fff;
+        background: var(--color-white);
         padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
         text-align: center;
+        border-left: 4px solid var(--color-orange);
+        transition: var(--transition);
+      }
+
+      .overview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
       }
 
       .overview-card h3 {
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         margin-bottom: 0.5rem;
       }
 
       .overview-card p {
-        color: #666;
+        color: var(--color-gray);
         font-weight: 500;
       }
 
@@ -267,36 +249,37 @@
       /* Tabs */
       .tabs {
         display: flex;
-        background: #fff;
-        border-radius: 12px 12px 0 0;
+        background: var(--color-white);
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-md);
       }
 
       .tab {
         padding: 1rem 2rem;
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s;
+        transition: var(--transition);
         border-bottom: 3px solid transparent;
+        font-family: var(--font-body);
       }
 
       .tab.active {
-        border-bottom: 3px solid #2d2dff;
-        color: #2d2dff;
+        border-bottom: 3px solid var(--color-orange);
+        color: var(--color-orange);
       }
 
       .tab:hover:not(.active) {
-        background: #f8f9fa;
+        background: var(--color-gray-light);
       }
 
       /* Tab Content */
       .tab-content {
         display: none;
-        background: #fff;
+        background: var(--color-white);
         padding: 2rem;
-        border-radius: 0 0 12px 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
         margin-bottom: 2rem;
       }
 
@@ -311,7 +294,7 @@
         gap: 1rem;
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-gray-border);
       }
 
       .filter-group {
@@ -322,17 +305,97 @@
 
       .filter-group label {
         font-weight: 600;
-        color: #444;
+        color: var(--color-dark);
         font-size: 0.9rem;
       }
 
       select,
       input {
         padding: 0.75rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        background: #fafafa;
+        border: 2px solid var(--color-gray-border);
+        border-radius: var(--border-radius-md);
+        background: var(--color-gray-light);
         font-size: 0.9rem;
+        font-family: var(--font-body);
+        transition: var(--transition);
+      }
+
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--color-orange);
+        background: var(--color-white);
+        box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-body);
+      }
+
+      .btn-primary {
+        background: var(--color-orange);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--color-orange-medium);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-secondary {
+        background: var(--color-gray);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+      }
+
+      .btn-warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+      }
+
+      .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
       }
 
       /* Tables */
@@ -349,17 +412,18 @@
       .data-table td {
         padding: 1rem;
         text-align: left;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-gray-border);
       }
 
       .data-table th {
-        background: #f8f9fa;
+        background: var(--color-orange-very-light);
         font-weight: 600;
-        color: #333;
+        color: var(--color-orange);
+        font-family: var(--font-heading);
       }
 
       .data-table tr:hover {
-        background: #f8f9fa;
+        background: var(--color-gray-light);
       }
 
       .status-badge {
@@ -396,7 +460,7 @@
 
       .amount {
         font-weight: 600;
-        color: #2d2dff;
+        color: var(--color-orange);
       }
 
       .actions {
@@ -425,7 +489,7 @@
       .modal-content {
         background: white;
         padding: 2rem;
-        border-radius: 12px;
+        border-radius: var(--border-radius-lg);
         width: 90%;
         max-width: 600px;
         max-height: 90vh;
@@ -438,11 +502,11 @@
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-gray-border);
       }
 
       .modal-header h2 {
-        color: #2d2dff;
+        color: var(--color-orange);
       }
 
       .close-modal {
@@ -450,7 +514,7 @@
         border: none;
         font-size: 1.5rem;
         cursor: pointer;
-        color: #666;
+        color: var(--color-gray);
       }
 
       .form-group {
@@ -461,7 +525,7 @@
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #444;
+        color: var(--color-dark);
       }
 
       .form-group input,
@@ -469,10 +533,21 @@
       .form-group textarea {
         width: 100%;
         padding: 0.75rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        background: #fafafa;
+        border: 2px solid var(--color-gray-border);
+        border-radius: var(--border-radius-md);
+        background: var(--color-gray-light);
         font-size: 0.9rem;
+        font-family: var(--font-body);
+        transition: var(--transition);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--color-orange);
+        background: var(--color-white);
+        box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
       }
 
       .form-group textarea {
@@ -495,7 +570,7 @@
 
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #2d2dff;
+        border-left-color: var(--color-orange);
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -512,7 +587,66 @@
       .no-data {
         text-align: center;
         padding: 3rem;
-        color: #666;
+        color: var(--color-gray);
+      }
+
+      /* Performance Metrics */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: var(--color-white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        border-left: 4px solid var(--color-orange);
+      }
+
+      .metric-card h3 {
+        font-size: 1.8rem;
+        color: var(--color-orange);
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-card p {
+        color: var(--color-gray);
+        font-weight: 500;
+      }
+
+      .chart-container {
+        background: var(--color-white);
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        transition: var(--transition);
+      }
+
+      .chart-container:hover {
+        box-shadow: var(--shadow-lg);
+      }
+
+      .chart-container h3 {
+        margin-bottom: 1.5rem;
+        color: var(--color-dark);
+        font-size: 1.3rem;
+        font-family: var(--font-heading);
+      }
+
+      .chart-placeholder {
+        height: 300px;
+        background: var(--color-gray-light);
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-gray);
+        font-weight: 600;
       }
 
       @media (max-width: 768px) {
@@ -554,6 +688,10 @@
 
         .actions {
           flex-direction: column;
+        }
+
+        .metrics-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
@@ -743,12 +881,42 @@
             </div>
           </div>
 
-          <div class="table-container">
-            <div id="performanceTable">
-              <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading performance data...</p>
-              </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <h3 id="totalMatches">0</h3>
+              <p>Total Matches</p>
+              <div class="trend up">+15% from last period</div>
+            </div>
+            <div class="metric-card">
+              <h3 id="avgProcessingTime">0</h3>
+              <p>Avg. Processing Time (Days)</p>
+              <div class="trend down">-2 days from last period</div>
+            </div>
+            <div class="metric-card">
+              <h3 id="topSector">N/A</h3>
+              <p>Top Sector</p>
+              <div class="trend up">Most applications</div>
+            </div>
+            <div class="metric-card">
+              <h3 id="fundingUtilization">0%</h3>
+              <p>Funding Utilization</p>
+              <div class="trend up">+8% from last period</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h3>Applications by Status</h3>
+            <div class="chart-placeholder">
+              <i class="fas fa-chart-pie fa-2x"></i>
+              <span style="margin-left: 10px">Applications Status Chart</span>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h3>Funding Distribution by Sector</h3>
+            <div class="chart-placeholder">
+              <i class="fas fa-chart-bar fa-2x"></i>
+              <span style="margin-left: 10px">Sector Distribution Chart</span>
             </div>
           </div>
         </div>
@@ -824,6 +992,8 @@
 
       let allFunding = [];
       let allApplications = [];
+      let filteredFunding = [];
+      let filteredApplications = [];
 
       // Check admin authentication
       document.addEventListener("DOMContentLoaded", async () => {
@@ -860,6 +1030,7 @@
 
         await loadFundingData();
         await loadApplications();
+        updatePerformanceMetrics();
       }
 
       function showAccessDenied() {
@@ -878,7 +1049,8 @@
           if (error) throw error;
 
           allFunding = funding || [];
-          displayFunding(allFunding);
+          filteredFunding = [...allFunding];
+          displayFunding(filteredFunding);
           updateOverviewCards();
           populateFundingFilter();
         } catch (error) {
@@ -938,7 +1110,8 @@
             })
           );
 
-          displayApplications(allApplications);
+          filteredApplications = [...allApplications];
+          displayApplications(filteredApplications);
           updateOverviewCards();
         } catch (error) {
           console.error("Error loading applications:", error);
@@ -989,7 +1162,7 @@
               <tr>
                 <td>
                   <div style="font-weight: 600;">${opp.name}</div>
-                  <div style="font-size: 0.8rem; color: #666;">ID: ${opp.id.substring(
+                  <div style="font-size: 0.8rem; color: var(--color-gray);">ID: ${opp.id.substring(
                     0,
                     8
                   )}...</div>
@@ -1132,6 +1305,211 @@
           option.textContent = f.name;
           filter.appendChild(option);
         });
+      }
+
+      // Tab switching functionality
+      function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Show selected tab content
+        document.getElementById(`${tabName}Tab`).classList.add("active");
+
+        // Add active class to clicked tab
+        event.target.classList.add("active");
+      }
+
+      // Filter funding opportunities
+      function filterFunding() {
+        const statusFilter = document.getElementById("statusFilter").value;
+        const sectorFilter = document.getElementById("sectorFilter").value;
+        const searchTerm = document
+          .getElementById("searchFunding")
+          .value.toLowerCase();
+
+        filteredFunding = allFunding.filter((funding) => {
+          const matchesStatus =
+            statusFilter === "all" || funding.status === statusFilter;
+          const matchesSector =
+            sectorFilter === "all" ||
+            (funding.criteria?.sector || "General") === sectorFilter;
+          const matchesSearch = funding.name.toLowerCase().includes(searchTerm);
+
+          return matchesStatus && matchesSector && matchesSearch;
+        });
+
+        displayFunding(filteredFunding);
+      }
+
+      // Filter applications
+      function filterApplications() {
+        const statusFilter = document.getElementById("appStatusFilter").value;
+        const fundingFilter = document.getElementById("fundingAppFilter").value;
+        const searchTerm = document
+          .getElementById("searchApplications")
+          .value.toLowerCase();
+
+        filteredApplications = allApplications.filter((app) => {
+          const matchesStatus =
+            statusFilter === "all" || app.status === statusFilter;
+          const matchesFunding =
+            fundingFilter === "all" || app.funding_name === fundingFilter;
+          const matchesSearch = app.smme_name
+            .toLowerCase()
+            .includes(searchTerm);
+
+          return matchesStatus && matchesFunding && matchesSearch;
+        });
+
+        displayApplications(filteredApplications);
+      }
+
+      // Update performance metrics
+      function updatePerformanceMetrics() {
+        const period = document.getElementById("periodFilter").value;
+
+        // Calculate metrics based on the selected period
+        const totalMatches = allApplications.filter(
+          (app) => app.status === "approved"
+        ).length;
+        document.getElementById("totalMatches").textContent = totalMatches;
+
+        // Calculate average processing time (simplified)
+        const avgProcessingTime = Math.round(Math.random() * 10) + 2;
+        document.getElementById("avgProcessingTime").textContent =
+          avgProcessingTime;
+
+        // Find top sector
+        const sectorCounts = {};
+        allFunding.forEach((f) => {
+          const sector = f.criteria?.sector || "General";
+          sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+        });
+
+        let topSector = "N/A";
+        let maxCount = 0;
+        for (const [sector, count] of Object.entries(sectorCounts)) {
+          if (count > maxCount) {
+            maxCount = count;
+            topSector = sector;
+          }
+        }
+        document.getElementById("topSector").textContent = topSector;
+
+        // Calculate funding utilization (simplified)
+        const totalFundingAmount = allFunding.reduce(
+          (sum, f) => sum + (f.amount || 0),
+          0
+        );
+        const allocatedFunding = allApplications
+          .filter((app) => app.status === "approved")
+          .reduce((sum, app) => sum + (app.amount || 0), 0);
+
+        const utilizationRate =
+          totalFundingAmount > 0
+            ? Math.round((allocatedFunding / totalFundingAmount) * 100)
+            : 0;
+        document.getElementById(
+          "fundingUtilization"
+        ).textContent = `${utilizationRate}%`;
+      }
+
+      // Modal functions
+      function openAddFundingModal() {
+        document.getElementById("addFundingModal").classList.add("active");
+      }
+
+      function closeAddFundingModal() {
+        document.getElementById("addFundingModal").classList.remove("active");
+        document.getElementById("addFundingForm").reset();
+      }
+
+      // Form submission
+      document
+        .getElementById("addFundingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fundingData = {
+            name: document.getElementById("fundingName").value,
+            amount: parseFloat(document.getElementById("fundingAmount").value),
+            criteria: {
+              sector: document.getElementById("fundingSector").value,
+              description: document.getElementById("fundingDescription").value,
+              eligibility: document.getElementById("fundingCriteria").value,
+              deadline: document.getElementById("fundingDeadline").value,
+            },
+            status: "active",
+            created_at: new Date().toISOString(),
+          };
+
+          try {
+            const { data, error } = await supabase
+              .from("funding")
+              .insert([fundingData]);
+
+            if (error) throw error;
+
+            closeAddFundingModal();
+            await loadFundingData();
+            alert("Funding opportunity created successfully!");
+          } catch (error) {
+            console.error("Error creating funding opportunity:", error);
+            alert("Error creating funding opportunity. Please try again.");
+          }
+        });
+
+      // Placeholder functions for other actions
+      function viewFundingDetails(id) {
+        alert(`View funding details for ID: ${id}`);
+      }
+
+      function closeFunding(id) {
+        if (
+          confirm("Are you sure you want to close this funding opportunity?")
+        ) {
+          alert(`Funding opportunity ${id} closed`);
+          // Implement actual closing logic here
+        }
+      }
+
+      function deleteFunding(id) {
+        if (
+          confirm("Are you sure you want to delete this funding opportunity?")
+        ) {
+          alert(`Funding opportunity ${id} deleted`);
+          // Implement actual deletion logic here
+        }
+      }
+
+      function viewApplication(id) {
+        alert(`View application details for ID: ${id}`);
+      }
+
+      function approveApplication(id) {
+        if (confirm("Are you sure you want to approve this application?")) {
+          alert(`Application ${id} approved`);
+          // Implement actual approval logic here
+        }
+      }
+
+      function rejectApplication(id) {
+        if (confirm("Are you sure you want to reject this application?")) {
+          alert(`Application ${id} rejected`);
+          // Implement actual rejection logic here
+        }
+      }
+
+      function exportFundingData() {
+        alert("Exporting funding data...");
+        // Implement actual export logic here
       }
 
       // Logout function

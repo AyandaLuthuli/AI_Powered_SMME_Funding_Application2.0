@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Browse Funding Opportunities - FundFinder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -14,167 +16,227 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+      /* CSS Variables for Orange Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #e65100;
+        --color-orange-medium: #ff6d00;
+        --color-orange-light: #ffab40;
+        --color-orange-very-light: #ffe0b2;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
-      :root {
-        --primary: #2d2dff;
-        --primary-dark: #1a1aff;
-        --primary-light: #6c8eff;
-        --secondary: #ff6b6b;
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --dark: #333;
-        --light: #f8f9fa;
-        --gray: #6c757d;
-        --border: #e0e0e0;
-        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        --radius: 12px;
-      }
-
       body {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-body);
         line-height: 1.6;
-        color: var(--dark);
-        background: #f5f7fa;
+        color: var(--color-dark);
+        background-color: var(--color-white);
+        font-weight: 500;
         min-height: 100vh;
       }
 
-      /* Header Styles */
-      .header {
-        background: white;
-        box-shadow: var(--shadow);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: var(--font-heading);
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        color: var(--color-dark);
       }
 
-      .nav-container {
+      h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        line-height: 1.1;
+      }
+
+      h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+      }
+
+      h3 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+      }
+
+      p {
+        margin-bottom: 1.5rem;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      /* Utility Classes */
+      .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 1rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        padding: 0 1.5rem;
       }
 
-      .logo {
-        font-weight: 700;
-        font-size: 1.8rem;
-        color: var(--primary);
-        text-decoration: none;
+      .section {
+        padding: 5rem 0;
       }
 
-      .nav-links {
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-      }
-
-      .nav-links a {
-        color: var(--dark);
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s;
-      }
-
-      .nav-links a:hover {
-        color: var(--primary);
-      }
-
-      .nav-links a.active {
-        color: var(--primary);
-        font-weight: 600;
-      }
-
-      .auth-buttons {
-        display: flex;
-        gap: 1rem;
-      }
-
-      .btn {
-        padding: 0.7rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-family: "Inter", sans-serif;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
+      .text-center {
         text-align: center;
       }
 
-      .btn-outline {
-        background: transparent;
-        border: 2px solid var(--primary);
-        color: var(--primary);
+      .mb-0 {
+        margin-bottom: 0;
       }
 
-      .btn-outline:hover {
-        background: var(--primary);
-        color: white;
+      /* Navbar */
+      nav.navbar {
+        position: sticky;
+        top: 0;
+        background: var(--color-white);
+        padding: 1.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        box-shadow: var(--shadow-sm);
+        border-bottom: 2px solid var(--color-orange);
       }
 
-      .btn-primary {
-        background: var(--primary);
-        color: white;
+      nav .logo {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        color: var(--color-orange);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
-      .btn-primary:hover {
-        background: var(--primary-dark);
+      nav .logo-img {
+        height: 40px;
+        width: auto;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      nav .logo-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--color-orange);
+        display: inline-block;
+      }
+
+      nav .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+
+      nav .nav-links a {
+        color: var(--color-dark);
+        font-weight: 600;
+        padding: 0.5rem 0;
+        position: relative;
+      }
+
+      nav .nav-links a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: var(--color-orange);
+        transition: var(--transition);
+        border-radius: var(--border-radius-sm);
+      }
+
+      nav .nav-links a:hover {
+        color: var(--color-orange);
+      }
+
+      nav .nav-links a:hover::after {
+        width: 100%;
+      }
+
+      nav .nav-links a.active {
+        color: var(--color-orange);
       }
 
       /* Hero Section */
       .hero {
+        position: relative;
+        padding: 6rem 0 4rem;
+        overflow: hidden;
         background: linear-gradient(
           135deg,
-          var(--primary) 0%,
-          var(--primary-light) 100%
+          var(--color-white) 0%,
+          var(--color-gray-light) 100%
         );
-        color: white;
-        padding: 4rem 2rem;
-        text-align: center;
       }
 
       .hero-content {
         max-width: 800px;
         margin: 0 auto;
+        text-align: center;
+        position: relative;
+        z-index: 2;
       }
 
-      .hero h1 {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
+      .hero-content h1 {
+        margin-bottom: 1.5rem;
+        color: var(--color-orange);
       }
 
-      .hero p {
-        font-size: 1.2rem;
-        opacity: 0.9;
-        margin-bottom: 2rem;
+      .hero-content p {
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        color: var(--color-gray);
       }
 
       /* Main Content */
       .main-container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 2rem 1.5rem;
       }
 
       /* Loading State */
       .loading {
         text-align: center;
         padding: 3rem;
-        color: var(--gray);
+        color: var(--color-gray);
       }
 
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: var(--primary);
+        border-left-color: var(--color-orange);
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -198,26 +260,28 @@
 
       .opportunity-card {
         background: white;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-sm);
         overflow: hidden;
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition: var(--transition);
+        border: 1px solid var(--color-gray-border);
       }
 
       .opportunity-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--color-orange-light);
       }
 
       .card-header {
         padding: 1.5rem;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--color-gray-border);
       }
 
       .fund-amount {
         font-size: 1.5rem;
         font-weight: 700;
-        color: var(--primary);
+        color: var(--color-orange);
         margin-bottom: 0.5rem;
       }
 
@@ -225,11 +289,11 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
-        color: var(--dark);
+        color: var(--color-dark);
       }
 
       .funder-name {
-        color: var(--gray);
+        color: var(--color-gray);
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
       }
@@ -249,17 +313,17 @@
       }
 
       .badge-sector {
-        background: rgba(45, 45, 255, 0.1);
-        color: var(--primary);
+        background: rgba(230, 81, 0, 0.1);
+        color: var(--color-orange);
       }
 
       .badge-location {
-        background: rgba(40, 167, 69, 0.1);
-        color: var(--success);
+        background: rgba(255, 171, 64, 0.1);
+        color: var(--color-orange-medium);
       }
 
       .badge-deadline {
-        background: rgba(255, 193, 7, 0.1);
+        background: rgba(255, 224, 178, 0.3);
         color: #b38f00;
       }
 
@@ -268,7 +332,7 @@
       }
 
       .fund-description {
-        color: var(--gray);
+        color: var(--color-gray);
         margin-bottom: 1.5rem;
         line-height: 1.6;
       }
@@ -277,64 +341,98 @@
         margin-top: 1rem;
         padding: 1rem;
         background: #f8f9fa;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
       }
 
       .requirements h4 {
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
-        color: var(--dark);
+        color: var(--color-dark);
       }
 
       .requirements-list {
         font-size: 0.85rem;
-        color: var(--gray);
+        color: var(--color-gray);
         line-height: 1.5;
       }
 
       .card-footer {
         padding: 1rem 1.5rem;
         background: #f8f9fa;
-        border-top: 1px solid var(--border);
+        border-top: 1px solid var(--color-gray-border);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        text-align: center;
+        border: none;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
       }
 
       .apply-btn {
         width: 100%;
         padding: 0.8rem;
-        background: var(--primary);
+        background: var(--color-orange);
         color: white;
         border: none;
-        border-radius: 8px;
-        font-family: "Inter", sans-serif;
+        border-radius: var(--border-radius-md);
+        font-family: var(--font-body);
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: var(--transition);
       }
 
       .apply-btn:hover {
-        background: var(--primary-dark);
+        background: var(--color-orange-medium);
       }
 
       .login-prompt {
         text-align: center;
         margin-top: 0.5rem;
         font-size: 0.8rem;
-        color: var(--gray);
+        color: var(--color-gray);
       }
 
       .no-data {
         text-align: center;
         padding: 3rem;
-        color: var(--gray);
+        color: var(--color-gray);
         grid-column: 1 / -1;
       }
 
       /* Footer */
-      .footer {
-        background: var(--dark);
-        color: white;
-        padding: 3rem 2rem 2rem;
+      footer {
+        background: var(--color-dark);
+        color: var(--color-white);
+        text-align: center;
+        padding: 3rem 0;
+        position: relative;
+        overflow: hidden;
         margin-top: 4rem;
+      }
+
+      footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--color-orange);
+      }
+
+      footer p {
+        color: rgba(255, 255, 255, 0.8);
       }
 
       .footer-content {
@@ -343,6 +441,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 2rem;
+        padding: 0 1.5rem;
       }
 
       .footer-section h3 {
@@ -373,17 +472,26 @@
 
       /* Responsive Design */
       @media (max-width: 768px) {
-        .nav-container {
+        .section {
+          padding: 4rem 0;
+        }
+
+        nav.navbar {
           flex-direction: column;
           gap: 1rem;
+          padding: 1rem 0;
         }
 
-        .nav-links {
-          gap: 1rem;
+        nav .nav-links {
+          gap: 1.5rem;
         }
 
-        .hero h1 {
-          font-size: 2.2rem;
+        .hero {
+          padding: 4rem 0 2rem;
+        }
+
+        .hero-content p {
+          font-size: 1.125rem;
         }
 
         .opportunities-grid {
@@ -392,50 +500,47 @@
       }
 
       @media (max-width: 480px) {
-        .main-container {
+        .hero-content h1 {
+          font-size: 2.25rem;
+        }
+
+        .opportunity-card {
           padding: 1rem;
         }
 
-        .hero {
-          padding: 2rem 1rem;
-        }
-
-        .hero h1 {
-          font-size: 1.8rem;
-        }
-
-        .auth-buttons {
-          flex-direction: column;
-          width: 100%;
-        }
-
-        .auth-buttons .btn {
-          width: 100%;
+        .main-container {
+          padding: 1rem;
         }
       }
     </style>
   </head>
   <body>
-    <!-- Header -->
-    <header class="header">
-      <div class="nav-container">
-        <a href="index.html" class="logo">FundFinder</a>
-        <div class="nav-links">
-          <a href="index.html">Home</a>
-
-          <a href="funders.html">Contact</a>
-        </div>
+    <!-- Navbar -->
+    <nav class="navbar container">
+      <div class="logo">
+        <span>FundFinder</span>
+        <span class="logo-dot"></span
+        ><!-- Logo placeholder - you can replace this with your actual logo -->
+        <img src="imgs/ELIDZ LOGO.png" alt="FundFinder Logo" class="logo-img" />
       </div>
-    </header>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html">Features</a>
+        <a href="index.html">How It Works</a>
+        <!-- <a href="funders.html" class="active">Browse Funds</a> -->
+      </div>
+    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-content">
-        <h1>Find Your Perfect Funding Match</h1>
-        <p>
-          Discover funding opportunities from top providers across South Africa.
-          No login required to browse.
-        </p>
+      <div class="container">
+        <div class="hero-content">
+          <h1>Find Your Perfect Funding Match</h1>
+          <p>
+            Discover funding opportunities from top providers across South
+            Africa. No login required to browse.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -458,7 +563,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer id="contact">
       <div class="footer-content">
         <div class="footer-section">
           <h3>FundFinder</h3>
@@ -470,15 +575,13 @@
         <div class="footer-section">
           <h3>Quick Links</h3>
           <a href="index.html">Home</a>
-          <a href="browse-funds.html">Browse Funds</a>
-          <a href="how-it-works.html">How It Works</a>
-          <a href="about.html">About Us</a>
+          <a href="funders.html">Browse Funds</a>
+          <a href="#how-it-works">How It Works</a>
         </div>
         <div class="footer-section">
           <h3>For Funders</h3>
           <a href="funder-signup.html">Become a Funder</a>
           <a href="funder-dashboard.html">Funder Dashboard</a>
-          <a href="investment-opportunities.html">View Opportunities</a>
         </div>
         <div class="footer-section">
           <h3>Contact Us</h3>
@@ -488,7 +591,8 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2024 FundFinder. All rights reserved.</p>
+        <p>&copy; 2025 FundFinder. All rights reserved.</p>
+        <p>Empowering South African SMMEs with smart funding solutions</p>
       </div>
     </footer>
 
@@ -638,10 +742,10 @@
       function showError(message) {
         opportunitiesGrid.innerHTML = `
                 <div class="no-data">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--danger);"></i>
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-orange);"></i>
                     <h3>Error Loading Opportunities</h3>
                     <p>${message}</p>
-                    <button class="btn btn-primary" onclick="loadFundingOpportunities()" style="margin-top: 1rem;">
+                    <button class="btn" onclick="loadFundingOpportunities()" style="margin-top: 1rem; background: var(--color-orange); color: white;">
                         Try Again
                     </button>
                 </div>

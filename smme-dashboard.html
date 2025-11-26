@@ -13,6 +13,28 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* CSS Variables for Orange Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #ff8c42; /* Softer orange */
+        --color-orange-medium: #ffa366;
+        --color-orange-light: #ffc8a8;
+        --color-orange-very-light: #ffe8db;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -20,31 +42,32 @@
       }
 
       body {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-body);
         line-height: 1.6;
-        color: #333;
-        background: #f5f7fa;
+        color: var(--color-dark);
+        background: var(--color-gray-light);
         min-height: 100vh;
       }
 
       /* Header */
       .header {
-        background: #fff;
+        background: var(--color-white);
         padding: 1rem 2rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 2px solid var(--color-orange);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
       }
 
       .logo {
         font-weight: 700;
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: var(--font-heading);
       }
 
       .nav-links {
@@ -54,18 +77,29 @@
       }
 
       .nav-links a {
-        color: #333;
+        color: var(--color-dark);
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
         padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        position: relative;
       }
 
       .nav-links a:hover,
       .nav-links a.active {
-        background: #2d2dff;
-        color: white;
+        color: var(--color-orange);
+      }
+
+      .nav-links a.active::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 1rem;
+        right: 1rem;
+        height: 3px;
+        background: var(--color-orange);
+        border-radius: var(--border-radius-sm);
       }
 
       .user-menu {
@@ -84,7 +118,11 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2d2dff, #667eea);
+        background: linear-gradient(
+          135deg,
+          var(--color-orange),
+          var(--color-orange-medium)
+        );
         display: flex;
         align-items: center;
         justify-content: center;
@@ -97,10 +135,13 @@
         color: white;
         border: none;
         padding: 0.6rem 1.2rem;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .logout-btn:hover {
@@ -117,19 +158,24 @@
 
       /* Welcome Section */
       .welcome-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(
+          135deg,
+          var(--color-orange) 0%,
+          var(--color-orange-medium) 100%
+        );
         color: white;
         padding: 4rem 3rem;
-        border-radius: 20px;
+        border-radius: var(--border-radius-lg);
         text-align: center;
         margin-bottom: 3rem;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-lg);
       }
 
       .welcome-section h1 {
         font-size: 3rem;
         margin-bottom: 1rem;
         font-weight: 700;
+        font-family: var(--font-heading);
       }
 
       .welcome-section p {
@@ -149,10 +195,16 @@
       .stat-card {
         background: rgba(255, 255, 255, 0.1);
         padding: 2rem;
-        border-radius: 15px;
+        border-radius: var(--border-radius-lg);
         text-align: center;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: var(--transition);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.15);
       }
 
       .stat-card i {
@@ -181,72 +233,81 @@
       }
 
       .action-card {
-        background: white;
+        background: var(--color-white);
         padding: 2.5rem;
-        border-radius: 15px;
+        border-radius: var(--border-radius-lg);
         text-align: center;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
         border: 2px solid transparent;
       }
 
       .action-card:hover {
         transform: translateY(-10px);
-        border-color: #2d2dff;
+        border-color: var(--color-orange);
+        box-shadow: var(--shadow-lg);
       }
 
       .action-card i {
         font-size: 3rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         margin-bottom: 1.5rem;
       }
 
       .action-card h3 {
         font-size: 1.5rem;
         margin-bottom: 1rem;
-        color: #333;
+        color: var(--color-dark);
+        font-family: var(--font-heading);
       }
 
       .action-card p {
-        color: #666;
+        color: var(--color-gray);
         margin-bottom: 2rem;
         line-height: 1.6;
       }
 
       .action-btn {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
         border: none;
         padding: 1rem 2rem;
-        border-radius: 10px;
+        border-radius: var(--border-radius-md);
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         width: 100%;
+        font-family: var(--font-body);
       }
 
       .action-btn:hover {
-        background: #1a1aff;
+        background: var(--color-orange-medium);
         transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
       }
 
       /* Pricing Section */
       .pricing-section {
-        background: white;
+        background: var(--color-white);
         padding: 3rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
         margin-bottom: 2rem;
       }
 
       .section-title {
         text-align: center;
         font-size: 2.5rem;
-        color: #333;
+        color: var(--color-dark);
         margin-bottom: 3rem;
-        background: linear-gradient(135deg, #2d2dff, #667eea);
+        background: linear-gradient(
+          135deg,
+          var(--color-orange),
+          var(--color-orange-medium)
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-family: var(--font-heading);
       }
 
       .pricing-grid {
@@ -256,18 +317,18 @@
       }
 
       .pricing-card {
-        background: #f8f9fa;
+        background: var(--color-gray-light);
         padding: 2.5rem;
-        border-radius: 15px;
+        border-radius: var(--border-radius-lg);
         text-align: center;
-        transition: transform 0.3s;
+        transition: var(--transition);
         border: 3px solid transparent;
         position: relative;
       }
 
       .pricing-card.popular {
-        background: white;
-        border-color: #2d2dff;
+        background: var(--color-white);
+        border-color: var(--color-orange);
         transform: scale(1.05);
       }
 
@@ -277,7 +338,7 @@
         top: -15px;
         left: 50%;
         transform: translateX(-50%);
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
         padding: 0.5rem 1.5rem;
         border-radius: 25px;
@@ -297,21 +358,26 @@
         font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 1rem;
-        color: #333;
+        color: var(--color-dark);
+        font-family: var(--font-heading);
       }
 
       .plan-price {
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, #2d2dff, #667eea);
+        background: linear-gradient(
+          135deg,
+          var(--color-orange),
+          var(--color-orange-medium)
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
 
       .plan-price .period {
         font-size: 1rem;
-        color: #666;
+        color: var(--color-gray);
       }
 
       .plan-features {
@@ -322,8 +388,8 @@
 
       .plan-features li {
         padding: 0.8rem 0;
-        border-bottom: 1px solid #eee;
-        color: #666;
+        border-bottom: 1px solid var(--color-gray-border);
+        color: var(--color-gray);
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -334,34 +400,36 @@
       }
 
       .plan-features li i {
-        color: #2d2dff;
+        color: var(--color-orange);
       }
 
       .pricing-btn {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
         border: none;
         padding: 1rem 2rem;
-        border-radius: 10px;
+        border-radius: var(--border-radius-md);
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         width: 100%;
+        font-family: var(--font-body);
       }
 
       .pricing-btn:hover {
-        background: #1a1aff;
+        background: var(--color-orange-medium);
         transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
       }
 
       .pricing-btn.secondary {
         background: transparent;
-        border: 2px solid #2d2dff;
-        color: #2d2dff;
+        border: 2px solid var(--color-orange);
+        color: var(--color-orange);
       }
 
       .pricing-btn.secondary:hover {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: white;
       }
 
@@ -405,6 +473,42 @@
 
         .pricing-card.popular:hover {
           transform: translateY(-10px);
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+        }
+
+        .stat-card {
+          padding: 1.5rem;
+        }
+
+        .stat-card h3 {
+          font-size: 1.5rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .welcome-section h1 {
+          font-size: 1.8rem;
+        }
+
+        .section-title {
+          font-size: 2rem;
+        }
+
+        .action-card,
+        .pricing-card {
+          padding: 1.5rem;
+        }
+
+        .pricing-section {
+          padding: 1.5rem;
         }
       }
     </style>

@@ -5,11 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FundFinder - Login/Signup</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
+      /* CSS Variables for Soft Orange Design System */
+      :root {
+        --color-white: #ffffff;
+        --color-orange: #ff8c42; /* Softer orange */
+        --color-orange-medium: #ffa366;
+        --color-orange-light: #ffc8a8;
+        --color-orange-very-light: #ffe8db;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
+        --font-heading: "Archivo Black", sans-serif;
+        --font-body: "Archivo", sans-serif;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -17,10 +45,10 @@
       }
 
       body {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-body);
         line-height: 1.6;
-        color: #333;
-        background: #f5f7fa;
+        color: var(--color-dark);
+        background: var(--color-gray-light);
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -35,15 +63,15 @@
         min-height: 700px;
         background: #fff;
         border-radius: 16px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--shadow-lg);
         overflow: hidden;
       }
 
       .welcome-section {
         flex: 1.2;
         background: linear-gradient(
-            rgba(45, 45, 255, 0.85),
-            rgba(106, 140, 255, 0.85)
+            rgba(255, 140, 66, 0.85),
+            rgba(255, 168, 102, 0.85)
           ),
           url("https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
         background-size: cover;
@@ -63,7 +91,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(45, 45, 255, 0.1);
+        background: rgba(255, 140, 66, 0.1);
         z-index: 1;
       }
 
@@ -73,6 +101,7 @@
       }
 
       .welcome-section h1 {
+        font-family: var(--font-heading);
         font-size: 2.5rem;
         margin-bottom: 2rem;
         line-height: 1.3;
@@ -117,18 +146,31 @@
       }
 
       .logo {
+        font-family: var(--font-heading);
         font-weight: 700;
         font-size: 2rem;
-        color: #2d2dff;
+        color: var(--color-orange);
         margin-bottom: 2.5rem;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .logo-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--color-orange);
+        display: inline-block;
       }
 
       .tabs {
         display: flex;
         margin-bottom: 2.5rem;
-        border-bottom: 2px solid #e0e0e0;
-        background: #f8f9fa;
+        border-bottom: 2px solid var(--color-gray-border);
+        background: var(--color-gray-light);
         border-radius: 10px 10px 0 0;
         overflow: hidden;
       }
@@ -139,13 +181,13 @@
         padding: 1.2rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         background: transparent;
-        color: #666;
+        color: var(--color-gray);
       }
 
       .tab.active {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: #fff;
       }
 
@@ -171,9 +213,10 @@
 
       .form h2 {
         margin-bottom: 2rem;
-        color: #333;
+        color: var(--color-dark);
         font-size: 1.8rem;
         text-align: center;
+        font-family: var(--font-heading);
       }
 
       .form-group {
@@ -184,7 +227,7 @@
         display: block;
         margin-bottom: 0.7rem;
         font-weight: 600;
-        color: #444;
+        color: var(--color-dark);
         font-size: 1rem;
       }
 
@@ -192,19 +235,20 @@
       .form-group select {
         width: 100%;
         padding: 1rem 1.2rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
+        border: 2px solid var(--color-gray-border);
+        border-radius: var(--border-radius-md);
         font-size: 1rem;
-        transition: all 0.3s;
-        background: #fafafa;
+        transition: var(--transition);
+        background: var(--color-gray-light);
+        font-family: var(--font-body);
       }
 
       .form-group input:focus,
       .form-group select:focus {
-        border-color: #2d2dff;
+        border-color: var(--color-orange);
         background: #fff;
         outline: none;
-        box-shadow: 0 0 0 3px rgba(45, 45, 255, 0.1);
+        box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
       }
 
       .form-group input.error {
@@ -225,23 +269,23 @@
         flex: 1;
         text-align: center;
         padding: 1.5rem 1rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
+        border: 2px solid var(--color-gray-border);
+        border-radius: var(--border-radius-md);
         cursor: pointer;
-        transition: all 0.3s;
-        background: #fafafa;
+        transition: var(--transition);
+        background: var(--color-gray-light);
       }
 
       .role-option:hover {
-        border-color: #2d2dff;
+        border-color: var(--color-orange);
         transform: translateY(-2px);
       }
 
       .role-option.selected {
-        border-color: #2d2dff;
-        background-color: rgba(45, 45, 255, 0.08);
+        border-color: var(--color-orange);
+        background-color: var(--color-orange-very-light);
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(45, 45, 255, 0.1);
+        box-shadow: 0 5px 15px rgba(255, 140, 66, 0.1);
       }
 
       .role-option i {
@@ -254,11 +298,11 @@
         display: block;
         font-weight: 600;
         margin-bottom: 0.5rem;
-        color: #333;
+        color: var(--color-dark);
       }
 
       .role-option small {
-        color: #666;
+        color: var(--color-gray);
         font-size: 0.85rem;
       }
 
@@ -266,21 +310,22 @@
         display: block;
         width: 100%;
         padding: 1.2rem;
-        background: #2d2dff;
+        background: var(--color-orange);
         color: #fff;
         border: none;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         margin-top: 1rem;
+        font-family: var(--font-body);
       }
 
       .btn:hover {
-        background: #1a1aff;
+        background: var(--color-orange-medium);
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(45, 45, 255, 0.3);
+        box-shadow: 0 5px 15px rgba(255, 140, 66, 0.3);
       }
 
       .btn:active {
@@ -288,7 +333,7 @@
       }
 
       .btn-secondary {
-        background: #6c757d;
+        background: var(--color-gray);
       }
 
       .btn-secondary:hover {
@@ -297,19 +342,19 @@
 
       .btn-outline {
         background: transparent;
-        border: 2px solid #2d2dff;
-        color: #2d2dff;
+        border: 2px solid var(--color-orange);
+        color: var(--color-orange);
       }
 
       .btn-outline:hover {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: #fff;
       }
 
       .message {
         margin-top: 1.5rem;
         padding: 1rem;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         text-align: center;
         font-weight: 500;
         display: none;
@@ -342,7 +387,7 @@
 
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #2d2dff;
+        border-left-color: var(--color-orange);
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -358,7 +403,7 @@
 
       .password-requirements {
         font-size: 0.85rem;
-        color: #666;
+        color: var(--color-gray);
         margin-top: 0.5rem;
       }
 
@@ -368,7 +413,7 @@
       }
 
       .forgot-password a {
-        color: #2d2dff;
+        color: var(--color-orange);
         text-decoration: none;
         font-weight: 500;
         cursor: pointer;
@@ -389,17 +434,17 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: #e0e0e0;
+        background: var(--color-gray-border);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
         font-size: 0.9rem;
-        transition: all 0.3s;
+        transition: var(--transition);
       }
 
       .step.active {
-        background: #2d2dff;
+        background: var(--color-orange);
         color: #fff;
       }
 
@@ -429,8 +474,8 @@
       .modal-content {
         background: #fff;
         padding: 2.5rem;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
         width: 90%;
         max-width: 450px;
         animation: modalFadeIn 0.3s ease;
@@ -454,12 +499,13 @@
 
       .modal-header h3 {
         font-size: 1.5rem;
-        color: #333;
+        color: var(--color-dark);
         margin-bottom: 0.5rem;
+        font-family: var(--font-heading);
       }
 
       .modal-header p {
-        color: #666;
+        color: var(--color-gray);
         font-size: 0.95rem;
       }
 
@@ -567,7 +613,10 @@
       <!-- Form Section -->
       <div class="form-section">
         <div class="form-container">
-          <div class="logo">FundFinder</div>
+          <div class="logo">
+            <span>FundFinder</span>
+            <span class="logo-dot"></span>
+          </div>
 
           <!-- Tabs for Login/Signup -->
           <div class="tabs">
@@ -1003,7 +1052,6 @@
         clearMessages();
       }
 
-      // Login form submission
       // Login form submission
       loginFormElement.addEventListener("submit", async (e) => {
         e.preventDefault();

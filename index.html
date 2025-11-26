@@ -15,25 +15,25 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
-      /* CSS Variables for Bright Design System */
+      /* CSS Variables for Orange Design System */
       :root {
         --color-white: #ffffff;
-        --color-orange: #ff6b35;
-        --color-orange-light: #ff8e53;
-        --color-green: #00c9a7;
-        --color-green-light: #5be8c9;
-        --color-purple: #845ec2;
-        --color-purple-light: #a178df;
-        --color-gray: #5a5a5a;
-        --color-gray-light: #f0f0f0;
+        --color-orange: #e65100;
+        --color-orange-medium: #ff6d00;
+        --color-orange-light: #ffab40;
+        --color-orange-very-light: #ffe0b2;
+        --color-dark: #333333;
+        --color-gray: #666666;
+        --color-gray-light: #f5f5f5;
+        --color-gray-border: #e0e0e0;
         --font-heading: "Archivo Black", sans-serif;
         --font-body: "Archivo", sans-serif;
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 20px;
-        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
-        --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
         --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
 
@@ -51,7 +51,7 @@
       body {
         font-family: var(--font-body);
         line-height: 1.6;
-        color: var(--color-gray);
+        color: var(--color-dark);
         background-color: var(--color-white);
         font-weight: 500;
         overflow-x: hidden;
@@ -66,19 +66,20 @@
         font-family: var(--font-heading);
         line-height: 1.2;
         margin-bottom: 1.5rem;
+        color: var(--color-dark);
       }
 
       h1 {
-        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-size: clamp(2.5rem, 5vw, 4rem);
         line-height: 1.1;
       }
 
       h2 {
-        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-size: clamp(2rem, 4vw, 3rem);
       }
 
       h3 {
-        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-size: clamp(1.5rem, 3vw, 2rem);
       }
 
       p {
@@ -128,7 +129,7 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          var(--color-purple-light) 0%,
+          var(--color-orange-light) 0%,
           transparent 70%
         );
         top: 10%;
@@ -140,7 +141,7 @@
         height: 0;
         border-left: 150px solid transparent;
         border-right: 150px solid transparent;
-        border-bottom: 260px solid var(--color-green-light);
+        border-bottom: 260px solid var(--color-orange-very-light);
         bottom: 10%;
         left: 5%;
         opacity: 0.4;
@@ -168,15 +169,23 @@
         align-items: center;
         z-index: 1000;
         box-shadow: var(--shadow-sm);
+        border-bottom: 2px solid var(--color-orange);
       }
 
       nav .logo {
         font-family: var(--font-heading);
         font-size: 1.75rem;
-        color: var(--color-purple);
+        color: var(--color-orange);
         display: flex;
         align-items: center;
         gap: 0.5rem;
+      }
+
+      nav .logo-img {
+        height: 40px;
+        width: auto;
+        display: inline-block;
+        vertical-align: middle;
       }
 
       nav .logo-dot {
@@ -193,7 +202,7 @@
       }
 
       nav .nav-links a {
-        color: var(--color-gray);
+        color: var(--color-dark);
         font-weight: 600;
         padding: 0.5rem 0;
         position: relative;
@@ -206,17 +215,13 @@
         left: 0;
         width: 0;
         height: 3px;
-        background: linear-gradient(
-          90deg,
-          var(--color-orange),
-          var(--color-purple)
-        );
+        background: var(--color-orange);
         transition: var(--transition);
         border-radius: var(--border-radius-sm);
       }
 
       nav .nav-links a:hover {
-        color: var(--color-purple);
+        color: var(--color-orange);
       }
 
       nav .nav-links a:hover::after {
@@ -245,14 +250,7 @@
 
       .hero-content h1 {
         margin-bottom: 1.5rem;
-        background: linear-gradient(
-          135deg,
-          var(--color-purple) 0%,
-          var(--color-orange) 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--color-orange);
       }
 
       .hero-content p {
@@ -279,7 +277,7 @@
         font-weight: 600;
         text-align: center;
         border: none;
-        border-radius: var(--border-radius-lg);
+        border-radius: var(--border-radius-md);
         transition: var(--transition);
         font-family: var(--font-body);
         font-size: 1rem;
@@ -309,31 +307,27 @@
       }
 
       .btn-primary {
-        background: linear-gradient(
-          135deg,
-          var(--color-orange) 0%,
-          var(--color-orange-light) 100%
-        );
+        background: var(--color-orange);
         color: white;
         box-shadow: var(--shadow-md);
       }
 
       .btn-primary:hover {
+        background: var(--color-orange-medium);
         transform: translateY(-3px);
         box-shadow: var(--shadow-lg);
       }
 
       .btn-secondary {
-        background: linear-gradient(
-          135deg,
-          var(--color-purple) 0%,
-          var(--color-purple-light) 100%
-        );
-        color: white;
-        box-shadow: var(--shadow-md);
+        background: transparent;
+        color: var(--color-orange);
+        border: 2px solid var(--color-orange);
+        box-shadow: var(--shadow-sm);
       }
 
       .btn-secondary:hover {
+        background: var(--color-orange);
+        color: white;
         transform: translateY(-3px);
         box-shadow: var(--shadow-lg);
       }
@@ -347,7 +341,7 @@
       .features h2 {
         text-align: center;
         margin-bottom: 3rem;
-        color: var(--color-purple);
+        color: var(--color-orange);
       }
 
       .feature-grid {
@@ -367,36 +361,13 @@
         flex-direction: column;
         align-items: flex-start;
         height: 100%;
-        border: 2px solid transparent;
-        background-clip: padding-box;
-      }
-
-      .feature-card::before {
-        content: "";
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: linear-gradient(
-          135deg,
-          var(--color-orange),
-          var(--color-green),
-          var(--color-purple)
-        );
-        border-radius: var(--border-radius-lg);
-        z-index: -1;
-        opacity: 0;
-        transition: var(--transition);
+        border: 1px solid var(--color-gray-border);
       }
 
       .feature-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--shadow-lg);
-      }
-
-      .feature-card:hover::before {
-        opacity: 1;
+        border-color: var(--color-orange-light);
       }
 
       .feature-icon {
@@ -409,38 +380,7 @@
         margin-bottom: 1.5rem;
         font-size: 1.75rem;
         color: white;
-      }
-
-      .feature-card:nth-child(1) .feature-icon {
-        background: linear-gradient(
-          135deg,
-          var(--color-orange),
-          var(--color-orange-light)
-        );
-      }
-
-      .feature-card:nth-child(2) .feature-icon {
-        background: linear-gradient(
-          135deg,
-          var(--color-green),
-          var(--color-green-light)
-        );
-      }
-
-      .feature-card:nth-child(3) .feature-icon {
-        background: linear-gradient(
-          135deg,
-          var(--color-purple),
-          var(--color-purple-light)
-        );
-      }
-
-      .feature-card:nth-child(4) .feature-icon {
-        background: linear-gradient(
-          135deg,
-          var(--color-orange-light),
-          var(--color-purple-light)
-        );
+        background: var(--color-orange);
       }
 
       .feature-card h3 {
@@ -450,22 +390,19 @@
 
       .feature-card p {
         flex-grow: 1;
+        color: var(--color-gray);
       }
 
       /* How It Works */
       .how-it-works {
         position: relative;
-        background: linear-gradient(
-          135deg,
-          var(--color-gray-light) 0%,
-          var(--color-white) 100%
-        );
+        background: var(--color-gray-light);
       }
 
       .how-it-works h2 {
         text-align: center;
         margin-bottom: 3rem;
-        color: var(--color-green);
+        color: var(--color-orange);
       }
 
       .steps {
@@ -485,23 +422,7 @@
         display: flex;
         flex-direction: column;
         text-align: center;
-        border-top: 5px solid transparent;
-      }
-
-      .step:nth-child(1) {
-        border-top-color: var(--color-orange);
-      }
-
-      .step:nth-child(2) {
-        border-top-color: var(--color-green);
-      }
-
-      .step:nth-child(3) {
-        border-top-color: var(--color-purple);
-      }
-
-      .step:nth-child(4) {
-        border-top-color: var(--color-orange-light);
+        border-top: 5px solid var(--color-orange);
       }
 
       .step::before {
@@ -514,7 +435,7 @@
         width: 40px;
         height: 40px;
         background: var(--color-white);
-        color: var(--color-gray);
+        color: var(--color-orange);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -523,23 +444,7 @@
         font-size: 1.25rem;
         border-radius: 50%;
         box-shadow: var(--shadow-sm);
-        border: 3px solid;
-      }
-
-      .step:nth-child(1)::before {
-        border-color: var(--color-orange);
-      }
-
-      .step:nth-child(2)::before {
-        border-color: var(--color-green);
-      }
-
-      .step:nth-child(3)::before {
-        border-color: var(--color-purple);
-      }
-
-      .step:nth-child(4)::before {
-        border-color: var(--color-orange-light);
+        border: 3px solid var(--color-orange);
       }
 
       .step:hover {
@@ -556,13 +461,54 @@
         color: var(--color-gray);
       }
 
+      /* Partnership Section */
+      .partnership {
+        position: relative;
+        background-color: var(--color-white);
+      }
+
+      .partnership h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: var(--color-orange);
+      }
+
+      .partnership-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .partnership-logo {
+        max-width: 300px;
+        height: auto;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+      }
+
+      .partnership-logo:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .partnership-text {
+        font-size: 1.125rem;
+        line-height: 1.7;
+        color: var(--color-gray);
+      }
+
+      .partnership-text strong {
+        color: var(--color-orange);
+      }
+
       /* Footer */
       footer {
-        background: linear-gradient(
-          135deg,
-          var(--color-purple) 0%,
-          var(--color-gray) 100%
-        );
+        background: var(--color-dark);
         color: var(--color-white);
         text-align: center;
         padding: 3rem 0;
@@ -577,12 +523,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(
-          90deg,
-          var(--color-orange),
-          var(--color-green),
-          var(--color-purple)
-        );
+        background: var(--color-orange);
       }
 
       footer p {
@@ -656,7 +597,9 @@
     <nav class="navbar container">
       <div class="logo">
         <span>FundFinder</span>
-        <span class="logo-dot"></span>
+        <span class="logo-dot"></span
+        ><!-- Logo placeholder - you can replace this with your actual logo -->
+        <img src="imgs/ELIDZ LOGO.png" alt="FundFinder Logo" class="logo-img" />
       </div>
       <div class="nav-links">
         <a href="#features">Features</a>
@@ -762,6 +705,34 @@
           <div class="step">
             <h3>Track & Grow</h3>
             <p>Monitor your application progress and receive updates.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partnership Section -->
+    <section class="section partnership">
+      <div class="container">
+        <h2>Our Strategic Partners</h2>
+        <div class="partnership-content">
+          <img
+            src="imgs/idz.jpg"
+            alt="East London IDZ Partnership"
+            class="partnership-logo"
+          />
+          <div class="partnership-text">
+            <p>
+              We're proud to partner with <strong>East London IDZ</strong> to
+              bring innovative funding solutions to businesses in the Eastern
+              Cape region. Together, we're working to streamline business growth
+              and development through our
+              <strong>Business Streamlined</strong> initiative.
+            </p>
+            <p>
+              This partnership enables us to offer specialized funding
+              opportunities and support services tailored to businesses
+              operating within the East London Industrial Development Zone.
+            </p>
           </div>
         </div>
       </div>

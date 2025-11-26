@@ -41,7 +41,7 @@
       .logo {
         font-weight: 700;
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: #ff8c42; /* Softer orange */
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -64,7 +64,7 @@
 
       .nav-links a:hover,
       .nav-links a.active {
-        background: #2d2dff;
+        background: #ff8c42; /* Softer orange */
         color: white;
       }
 
@@ -84,7 +84,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #2d2dff;
+        background: #ff8c42; /* Softer orange */
         color: white;
         display: flex;
         align-items: center;
@@ -110,11 +110,14 @@
         background: #ff4757;
         color: white;
         border: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        border-radius: var(--border-radius-md);
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .logout-btn:hover {
@@ -155,7 +158,7 @@
       }
 
       .page-header h1 {
-        color: #2d2dff;
+        color: #ff8c42; /* Softer orange */
         font-size: 2.5rem;
       }
 
@@ -173,12 +176,12 @@
       }
 
       .btn-primary {
-        background: #2d2dff;
+        background: #ff8c42; /* Softer orange */
         color: white;
       }
 
       .btn-primary:hover {
-        background: #1a1aff;
+        background: #ffa366; /* Lighter orange */
         transform: translateY(-2px);
       }
 
@@ -241,7 +244,7 @@
 
       .overview-card h3 {
         font-size: 1.8rem;
-        color: #2d2dff;
+        color: #ff8c42; /* Softer orange */
         margin-bottom: 0.5rem;
       }
 
@@ -289,7 +292,7 @@
 
       .action-card i {
         font-size: 2.5rem;
-        color: #2d2dff;
+        color: #ff8c42; /* Softer orange */
         margin-bottom: 1rem;
       }
 
@@ -336,8 +339,8 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #e0e7ff;
-        color: #2d2dff;
+        background: #ffe8db; /* Very light orange */
+        color: #ff8c42; /* Softer orange */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -364,7 +367,7 @@
 
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #2d2dff;
+        border-left-color: #ff8c42; /* Softer orange */
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -459,22 +462,22 @@
           <div class="overview-card">
             <h3 id="totalFunding">0</h3>
             <p>Active Funding Opportunities</p>
-            <div class="trend up">+2 this month</div>
+            <!-- <div class="trend up">+2 this month</div> -->
           </div>
           <div class="overview-card">
             <h3 id="totalApplications">0</h3>
             <p>Total Applications</p>
-            <div class="trend up">+15 this week</div>
+            <!-- <div class="trend up">+15 this week</div> -->
           </div>
           <div class="overview-card">
             <h3 id="pendingReviews">0</h3>
             <p>Pending Reviews</p>
-            <div class="trend up">+5 today</div>
+            <!-- <div class="trend up">+5 today</div> -->
           </div>
           <div class="overview-card">
             <h3 id="successRate">0%</h3>
             <p>Funding Success Rate</p>
-            <div class="trend up">+3% this month</div>
+            <!-- <div class="trend up">+3% this month</div> -->
           </div>
         </div>
 
