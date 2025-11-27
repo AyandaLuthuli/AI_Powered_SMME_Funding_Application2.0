@@ -72,39 +72,29 @@
 
       .nav-links {
         display: flex;
-        gap: 1rem;
+        gap: 2rem;
+        align-items: center;
       }
 
       .nav-links a {
-        color: var(--color-dark);
+        color: #333;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 500;
         padding: 0.5rem 1rem;
-        border-radius: var(--border-radius-md);
-        transition: var(--transition);
-        position: relative;
+        border-radius: 8px;
+        transition: all 0.3s;
       }
 
       .nav-links a:hover,
       .nav-links a.active {
-        color: var(--color-orange);
-      }
-
-      .nav-links a.active::after {
-        content: "";
-        position: absolute;
-        bottom: -2px;
-        left: 1rem;
-        right: 1rem;
-        height: 3px;
-        background: var(--color-orange);
-        border-radius: var(--border-radius-sm);
+        background: #ff8c42; /* Softer orange */
+        color: white;
       }
 
       .user-menu {
         display: flex;
-        gap: 1rem;
         align-items: center;
+        gap: 1rem;
       }
 
       .user-info {
@@ -114,19 +104,29 @@
       }
 
       .user-avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: var(--color-orange);
+        background: #ff8c42; /* Softer orange */
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
+        font-weight: bold;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
       }
 
       .user-name {
         font-weight: 600;
+      }
+
+      .user-role {
+        font-size: 0.8rem;
+        color: #666;
       }
 
       .logout-btn {
@@ -469,35 +469,18 @@
           <a href="funder-funding.html" class="active">My Funding</a>
           <a href="funder-applications.html">Applications</a>
         </nav>
-
-        <div class="user-menu">
-          <div style="display: flex; align-items: center; gap: 0.5rem">
-            <div
-              id="user-avatar"
-              style="
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: var(--primary);
-                color: #fff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 700;
-              "
-            >
-              F
-            </div>
-            <div id="userName" style="font-weight: 600">Funder</div>
+      </div>
+      <div class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">F</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Funder</div>
+            <div class="user-role">Funding Provider</div>
           </div>
-          <button
-            class="btn"
-            onclick="logout()"
-            style="background: #ff4757; color: #fff; border-radius: 8px"
-          >
-            <i class="fas fa-sign-out-alt"></i>
-          </button>
         </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </div>
     </div>
 
