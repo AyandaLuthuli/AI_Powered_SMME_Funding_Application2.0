@@ -1,6 +1,7 @@
 # AI_Powered_SMME_Funding_Application
 
 A system that helps Small, Medium, and Micro Enterprises (SMMEs) automatically find funding, match opportunities, auto-fill applications, and track status using AI + Supabase + JavaScript.
+Live Demo: https://smmesfundfinder.netlify.app/
 
 🚀 1. Project Overview
 
